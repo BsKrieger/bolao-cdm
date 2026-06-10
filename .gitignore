@@ -1,0 +1,28 @@
+# Sistema operacional / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores / editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Ferramentas locais do Claude Code / Claude Code local tooling
+.claude/
+
+# Logs e temporários / logs and temp
+*.log
+tmp/
+temp/
+
+# Python (utilitário da logo) / logo helper
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Supabase local (caso use a CLI) / supabase local CLI
+supabase/.branches/
+supabase/.temp/

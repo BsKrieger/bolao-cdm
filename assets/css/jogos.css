@@ -1,0 +1,401 @@
+/* =========================================================================
+   Tela de Jogos & Palpites / Matches & predictions screen
+   Complementa styles.css (mesma identidade visual).
+   ========================================================================= */
+
+/* .page / .page__* agora vivem em styles.css (compartilhado) */
+
+/* --- Filtro de fases (fixo no topo ao rolar) --- */
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 12px 0;
+  margin-bottom: 12px;
+  background: linear-gradient(var(--color-bg) 75%, transparent);
+}
+
+.filterbar button {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.filterbar button:hover {
+  color: var(--color-text);
+}
+
+.filterbar button.is-active {
+  background: var(--color-primary);
+  color: #04201a;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* --- Seção de fase --- */
+.phase {
+  margin-bottom: 28px;
+}
+
+.phase__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.phase__head h2 {
+  font-size: 1.3rem;
+}
+
+.phase__mult {
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.group-title {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin: 18px 0 8px;
+}
+
+/* --- Card de jogo --- */
+.match {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.match.is-locked {
+  opacity: 0.7;
+}
+
+.match__info {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+}
+
+.match__venue {
+  text-align: right;
+}
+
+.match__row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.team--home {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.team--away {
+  justify-content: flex-start;
+}
+
+.team__flag {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.team__name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.match__scores {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.score {
+  width: 46px;
+  height: 44px;
+  text-align: center;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.score::-webkit-outer-spin-button,
+.score::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.score:focus {
+  outline: 2px solid var(--color-primary);
+  border-color: transparent;
+}
+
+.score:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.score__x {
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.match__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  min-height: 18px;
+}
+
+.status {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.status--locked {
+  color: #ff8c8c;
+  font-weight: 600;
+}
+
+.status--open {
+  color: var(--color-primary);
+}
+
+.saved {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.saved--ok {
+  color: var(--color-primary);
+}
+
+/* --- Quem avança (mata-mata) / advancement pick --- */
+.advance {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.advance__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.advance__opts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.advance__btn {
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.advance__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.advance__btn.is-on {
+  background: var(--color-primary);
+  color: #04201a;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.advance__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Palpites bônus / bonus picks --- */
+.bonus {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 18px 18px 20px;
+  margin-bottom: 16px;
+}
+
+.bonus__note {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  margin: 4px 0 14px;
+}
+
+.bonus__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.bonus__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bonus__label {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.bonus__input {
+  padding: 11px 12px;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.98rem;
+}
+
+.bonus__input:focus {
+  outline: 2px solid var(--color-primary);
+  border-color: transparent;
+}
+
+.bonus__input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Select nativo (artilheiro: lista longa de 1.249 jogadores) / native select --- */
+.bonus__select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 36px;
+  color: var(--color-text-muted); /* azulado, igual à seleção campeã */
+  cursor: pointer;
+  /* seta neutra que funciona nos dois temas / chevron readable on both themes */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23a7acce' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* --- Dropdown customizado (campeã, com bandeiras) / custom flag dropdown --- */
+.cselect {
+  position: relative;
+}
+
+.cselect__btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 11px 36px 11px 12px; /* espaço à direita p/ a seta */
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.98rem;
+  cursor: pointer;
+  /* mesma seta do artilheiro / same chevron as the top-scorer select */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23a7acce' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.cselect__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cselect__ph {
+  color: var(--color-text-muted);
+}
+
+.cselect__list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 4px;
+}
+
+.cselect__opt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cselect__opt:hover {
+  background: var(--color-surface-2);
+}
+
+@media (max-width: 560px) {
+  .team__name { font-size: 0.9rem; }
+  .team__flag { font-size: 1.2rem; }
+  .score { width: 40px; height: 40px; font-size: 1.05rem; }
+  .match__info { font-size: 0.72rem; }
+  .bonus__grid { grid-template-columns: 1fr; }
+}

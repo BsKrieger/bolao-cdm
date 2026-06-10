@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meus palpites · Bolão CDM</title>
+  <link rel="icon" type="image/png" href="assets/img/logo-cdm.png" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/participante.css" />
+  <script src="assets/js/theme.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <img class="brand__logo" src="assets/img/logo-cdm.png" alt="Logo do Bolão CDM" />
+      <span class="brand__text">Bolão <strong>CDM</strong></span>
+    </a>
+    <nav class="topnav" aria-label="Navegação principal">
+      <a class="topnav__link" href="index.html">Início</a>
+      <a class="topnav__link" href="jogos.html">Jogos</a>
+      <a class="topnav__link" href="ranking.html">Ranking</a>
+      <a class="topnav__link is-active" href="participante.html">Meus palpites</a>
+      <a class="topnav__link" href="regras.html">Regras</a>
+    </nav>
+    <button id="profileChip" class="profile-chip" type="button" title="Editar seu nome"></button>
+  </header>
+
+  <main class="page">
+    <div class="page__head">
+      <h1 class="page__title">Meus palpites</h1>
+      <p class="page__sub">Seu desempenho no bolão — pontos, acertos e detalhe por jogo.</p>
+    </div>
+
+    <section id="dashStats"></section>
+    <section id="dashBonus"></section>
+    <section id="dashScored"></section>
+  </main>
+
+  <!-- Dados primeiro, depois a lógica -->
+  <script src="data/teams.js"></script>
+  <script src="data/matches.js"></script>
+  <script src="data/results.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/scoring.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/participante.js"></script>
+  <footer class="footer">
+    <p>⚽ Bolão CDM · Copa 2026 ⚽</p>
+  </footer>
+</body>
+</html>

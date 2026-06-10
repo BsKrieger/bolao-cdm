@@ -1,0 +1,72 @@
+/* =========================================================================
+   Ranking / leaderboard — complementa styles.css
+   ========================================================================= */
+.rank {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.rank th,
+.rank td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.rank thead th {
+  background: var(--color-surface-2);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+.rank tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rank__pos {
+  width: 52px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.rank__name {
+  font-weight: 600;
+}
+
+.rank__pts {
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.rank__sub {
+  width: 80px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.rank__row--me {
+  background: rgba(0, 195, 137, 0.12);
+}
+
+.rank__row--me .rank__name::after {
+  content: " (você)";
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.rank-loading {
+  color: var(--color-text-muted);
+  padding: 20px 2px;
+}
+
+@media (max-width: 560px) {
+  .rank th, .rank td { padding: 10px 8px; }
+}

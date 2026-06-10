@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Regras &amp; Premiação · Bolão CDM</title>
+  <link rel="icon" type="image/png" href="assets/img/logo-cdm.png" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script src="assets/js/theme.js"></script>
+  <style>
+    /* Estilos locais da página de regras / rules page local styles */
+    .rules-table { width: 100%; border-collapse: collapse; background: var(--color-surface);
+      border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
+    .rules-table th, .rules-table td { padding: 12px 14px; text-align: left;
+      border-bottom: 1px solid var(--color-border); }
+    .rules-table thead th { background: var(--color-surface-2); font-size: 0.85rem;
+      text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-text-muted); }
+    .rules-table tr:last-child td { border-bottom: none; }
+    .rules-table .pts { color: var(--color-primary); font-weight: 700; white-space: nowrap; }
+    .rules-list { line-height: 1.7; color: var(--color-text-muted); padding-left: 18px; }
+    .rules-list strong { color: var(--color-text); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <img class="brand__logo" src="assets/img/logo-cdm.png" alt="Logo do Bolão CDM" />
+      <span class="brand__text">Bolão <strong>CDM</strong></span>
+    </a>
+    <nav class="topnav" aria-label="Navegação principal">
+      <a class="topnav__link" href="index.html">Início</a>
+      <a class="topnav__link" href="jogos.html">Jogos</a>
+      <a class="topnav__link" href="ranking.html">Ranking</a>
+      <a class="topnav__link" href="participante.html">Meus palpites</a>
+      <a class="topnav__link is-active" href="regras.html">Regras</a>
+    </nav>
+    <button id="profileChip" class="profile-chip" type="button" title="Editar seu nome"></button>
+  </header>
+
+  <main>
+    <section class="section">
+      <h1 class="section__title">Regras &amp; Premiação</h1>
+      <p class="section__hint">Como pontuar, os multiplicadores por fase e como o prêmio é dividido.</p>
+    </section>
+
+    <!-- Pontuação por jogo -->
+    <section class="section">
+      <h2 class="section__title">Pontos por jogo</h2>
+      <table class="rules-table">
+        <thead>
+          <tr><th>Acerto</th><th>Pontos</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Placar exato</td><td class="pts">10</td></tr>
+          <tr><td>Resultado certo (vitória ou empate)</td><td class="pts">5</td></tr>
+          <tr><td>Saldo de gols (diferença) — vale também no empate</td><td class="pts">+3</td></tr>
+          <tr><td>Quem avança no mata-mata (inclui pênaltis)</td><td class="pts">+2</td></tr>
+        </tbody>
+      </table>
+      <p class="section__hint" style="margin-top:12px;">
+        O placar exato vale 10 cheios (não soma com o resultado). Os pontos do jogo
+        são multiplicados pelo peso da fase.
+      </p>
+    </section>
+
+    <!-- Multiplicadores -->
+    <section class="section">
+      <h2 class="section__title">Multiplicador por fase</h2>
+      <table class="rules-table">
+        <thead>
+          <tr><th>Fase</th><th>Multiplicador</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Fase de grupos</td><td class="pts">1x</td></tr>
+          <tr><td>32 avos de final</td><td class="pts">1,25x</td></tr>
+          <tr><td>Oitavas de final</td><td class="pts">1,5x</td></tr>
+          <tr><td>Quartas de final</td><td class="pts">2x</td></tr>
+          <tr><td>Semifinais</td><td class="pts">2,5x</td></tr>
+          <tr><td>Disputa de 3º lugar</td><td class="pts">2,5x</td></tr>
+          <tr><td>Final</td><td class="pts">3x</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Bônus -->
+    <section class="section">
+      <h2 class="section__title">Palpites bônus</h2>
+      <table class="rules-table">
+        <thead>
+          <tr><th>Palpite</th><th>Pontos</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Seleção campeã</td><td class="pts">20</td></tr>
+          <tr><td>Artilheiro da Copa</td><td class="pts">15</td></tr>
+        </tbody>
+      </table>
+      <p class="section__hint" style="margin-top:12px;">Travam quando a bola rolar no primeiro jogo da Copa.</p>
+    </section>
+
+    <!-- Prazo -->
+    <section class="section">
+      <h2 class="section__title">Prazo dos palpites</h2>
+      <ul class="rules-list">
+        <li>Você pode <strong>enviar e alterar</strong> o palpite até a bola rolar.</li>
+        <li>Quando o jogo começa, o sistema <strong>trava automaticamente</strong>, sem exceção.</li>
+        <li>Cada jogo mostra um <strong>contador regressivo</strong> até o fechamento.</li>
+        <li>Todos os horários são exibidos no <strong>fuso de Brasília</strong>.</li>
+      </ul>
+    </section>
+
+    <!-- Desempate -->
+    <section class="section">
+      <h2 class="section__title">Critério de desempate</h2>
+      <ul class="rules-list">
+        <li>1º) Maior número de <strong>placares exatos</strong>.</li>
+        <li>2º) Maior número de <strong>resultados certos</strong> (vencedor/empate).</li>
+      </ul>
+      <p class="section__hint">Aplicado automaticamente no ranking geral.</p>
+    </section>
+
+    <!-- Premiação -->
+    <section class="section">
+      <h2 class="section__title">Premiação</h2>
+      <p class="section__hint">23 participantes · R$ 50 cada · pote total de R$ 1.150</p>
+      <div class="prizes">
+        <article class="prize prize--gold">
+          <span class="prize__medal" aria-hidden="true">🥇</span>
+          <span class="prize__place">1º lugar</span>
+          <span class="prize__value">R$ 700</span>
+        </article>
+        <article class="prize prize--silver">
+          <span class="prize__medal" aria-hidden="true">🥈</span>
+          <span class="prize__place">2º lugar</span>
+          <span class="prize__value">R$ 300</span>
+        </article>
+        <article class="prize prize--bronze">
+          <span class="prize__medal" aria-hidden="true">🥉</span>
+          <span class="prize__place">3º lugar</span>
+          <span class="prize__value">R$ 150</span>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>⚽ Bolão CDM · Copa 2026 ⚽</p>
+  </footer>
+
+  <!-- Mostra o nome no cabeçalho se já houver perfil (sem forçar cadastro) -->
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const _p = Storage.getProfile();
+    if (_p) App.renderProfileChip(_p);
+  </script>
+</body>
+</html>
