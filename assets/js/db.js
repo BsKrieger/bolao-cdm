@@ -215,15 +215,50 @@ const DB = (() => {
   // ---- Everything, for the ranking / tudo, para o ranking ----
 
   /**
+   * Fetches EVERY row of a table, paginating in pages of 1000 (PostgREST returns
+   * at most 1000 rows per request). A stable `order` is required so pagination
+   * never skips or repeats rows.
+   * Busca TODAS as linhas de uma tabela, paginando de 1000 em 1000 (o PostgREST
+   * devolve no máx. 1000 por requisição). Um `order` estável é obrigatório para a
+   * paginação não pular nem repetir linhas.
+   *
+   * @param {string} table - Table name / Nome da tabela.
+   * @param {string} order - Stable order clause / Cláusula de ordenação estável.
+   * @returns {Promise<Array>} All rows / Todas as linhas.
+   */
+  async function fetchAllRows(table, order) {
+    const PAGE = 1000;
+    let offset = 0;
+    const out = [];
+    for (;;) {
+      const rows = await rest(
+        table + "?select=*&order=" + order + "&limit=" + PAGE + "&offset=" + offset,
+        { headers: headers() }
+      );
+      if (!rows || !rows.length) break;
+      out.push(...rows);
+      if (rows.length < PAGE) break; // última página / last page
+      offset += PAGE;
+    }
+    return out;
+  }
+
+  /**
    * Fetches participants, predictions and bonus in parallel.
+   * Predictions are paginated: with 23 friends the table crosses 1000 rows, and
+   * a single request would silently drop the most recent picks from the ranking
+   * and from everyone's-picks. / predictions paginated to dodge the 1000-row cap.
    * Busca participantes, palpites e bônus em paralelo.
+   * Os palpites são paginados: com 23 amigos a tabela passa de 1000 linhas, e uma
+   * única requisição descartaria calado os palpites mais recentes do ranking e da
+   * galera.
    *
    * @returns {Promise<{participants:Array, predictions:Array, bonus:Array}>}
    */
   async function fetchAll() {
     const [participants, predictions, bonus] = await Promise.all([
       rest("participants?select=*", { headers: headers() }),
-      rest("predictions?select=*", { headers: headers() }),
+      fetchAllRows("predictions", "participant_id.asc,match_id.asc"),
       rest("bonus?select=*", { headers: headers() }),
     ]);
     return { participants: participants || [], predictions: predictions || [], bonus: bonus || [] };
