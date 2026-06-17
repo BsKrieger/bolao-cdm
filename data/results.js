@@ -1,20 +1,27 @@
-/* =========================================================================
-   Resultados reais dos jogos / actual match results
-   ---------------------------------------------------------------------------
-   O organizador preenche AQUI conforme os jogos terminam. O motor de
-   pontuação (scoring.js) compara os palpites com estes resultados.
-
-   Formato por jogo:
-     [id]: { home: <gols mandante>, away: <gols visitante>, advances: "home" | "away" }
-
-   - home / away: placar final (tempo normal + prorrogação; NÃO conte pênaltis
-     como gol aqui — pênaltis entram só no "advances").
-   - advances: quem se classificou. Use SÓ em jogos de mata-mata (32-avos→semis).
-       "home" = mandante avançou · "away" = visitante avançou.
-       Vale inclusive quando a vaga foi decidida nos pênaltis.
-       Em grupos, 3º lugar e final: omita o "advances".
-   - Jogo ainda não realizado: não inclua o id (deixe de fora).
-   ========================================================================= */
+/**
+ * @file Actual match results / Resultados reais dos jogos.
+ *
+ * EN: The organizer fills this in as games end (it's the static fallback; the
+ *     live source is the Supabase `results` table). scoring.js compares the
+ *     predictions against these results.
+ *     Per match: [id]: { home: <home goals>, away: <away goals>, advances: "home"|"away" }
+ *      - home/away: final score (normal time + extra time; do NOT count
+ *        penalties as goals — penalties only affect "advances").
+ *      - advances: who qualified. Use ONLY in knockouts (r32→sf); valid even when
+ *        decided on penalties. Omit in groups, third place and final.
+ *      - Match not played yet: leave the id out.
+ * PT-BR: O organizador preenche AQUI conforme os jogos terminam (é o fallback
+ *        estático; a fonte ao vivo é a tabela `results` do Supabase). O
+ *        scoring.js compara os palpites com estes resultados.
+ *        Por jogo: [id]: { home: <gols casa>, away: <gols fora>, advances: "home"|"away" }
+ *         - home/away: placar final (normal + prorrogação; NÃO conte pênaltis
+ *           como gol — pênaltis entram só no "advances").
+ *         - advances: quem se classificou. Use SÓ no mata-mata (16-avos→semis);
+ *           vale mesmo nos pênaltis. Omita em grupos, 3º lugar e final.
+ *         - Jogo não realizado: não inclua o id.
+ *
+ * @author Bruno Krieger
+ */
 const RESULTS = {
   // Exemplos (apague quando a Copa começar):
   // 1:  { home: 2, away: 1 },                      // jogo de grupos

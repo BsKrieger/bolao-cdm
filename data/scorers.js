@@ -1,10 +1,17 @@
-/* =========================================================================
-   Convocações da Copa 2026 / World Cup 2026 squads
-   GERADO automaticamente a partir do football-data.org (mesma fonte que
-   decide o artilheiro), para a lista suspensa do palpite de artilheiro.
-   NÃO editar à mão — a grafia precisa casar com a API na hora de pontuar.
-   Estrutura: [{ country: "<PT>", players: ["<nome exato da API>", ...] }]
-   ========================================================================= */
+/**
+ * @file World Cup 2026 squads / Convocações da Copa 2026.
+ *
+ * EN: Auto-GENERATED from football-data.org (the same source that decides the
+ *     top scorer), for the top-scorer dropdown. Do NOT edit by hand — the
+ *     spelling must match the API at scoring time.
+ *     Shape: [{ country: "<PT>", players: ["<exact API name>", ...] }]
+ * PT-BR: GERADO automaticamente a partir do football-data.org (mesma fonte que
+ *        decide o artilheiro), para a lista suspensa do artilheiro. NÃO editar à
+ *        mão — a grafia precisa casar com a API na hora de pontuar.
+ *        Estrutura: [{ country: "<PT>", players: ["<nome exato da API>", ...] }]
+ *
+ * @author Bruno Krieger
+ */
 const SCORERS =[
     {
         "country":  "África do Sul",

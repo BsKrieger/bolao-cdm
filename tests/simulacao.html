@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulação da fase de grupos · Bolão CDM</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    .sim-wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 60px; }
+    .sim-sec { background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius); padding: 20px; margin: 18px 0; }
+    .sim-sec h2 { font-size: 1.25rem; margin-bottom: 10px; }
+    .sim-score { font-size: 1.1rem; font-weight: 800; margin: 0 0 12px; }
+    .sim-ok { color: var(--color-primary); }
+    .sim-fail { color: #ff6b6b; }
+    .sim-check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px;
+      border-bottom: 1px solid var(--color-border); }
+    .sim-check small { color: var(--color-text-muted); }
+    .sim-mark { font-weight: 800; min-width: 18px; }
+    .sim-table { width: 100%; border-collapse: collapse; }
+    .sim-table th, .sim-table td { padding: 8px 10px; text-align: left;
+      border-bottom: 1px solid var(--color-border); }
+    .sim-table thead th { background: var(--color-surface-2); font-size: .8rem;
+      text-transform: uppercase; color: var(--color-text-muted); }
+    .sim-top td { background: rgba(0,195,137,.10); font-weight: 600; }
+    .sim-match { border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      padding: 10px 12px; margin-bottom: 10px; }
+    .sim-match--locked { border-style: dashed; opacity: .85; }
+    .sim-match__head { font-weight: 600; margin-bottom: 6px; }
+    .sim-match__head b { color: var(--color-accent); margin: 0 6px; }
+    .sim-badge { font-size: .72rem; color: var(--color-text-muted); border: 1px solid var(--color-border);
+      border-radius: 999px; padding: 2px 8px; margin-left: 8px; white-space: nowrap; }
+    .sim-badge--lock { color: #ff9f6b; }
+    .sim-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 4px 12px; }
+    .sim-pick { font-size: .82rem; color: var(--color-text-muted); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; }
+    .sim-pick b { color: var(--color-text); }
+    .sim-pick em { color: var(--color-primary); font-style: normal; }
+    .sim-locknote, .sim-note { color: var(--color-text-muted); font-size: .85rem; margin: 6px 0 0; }
+    .sim-head { text-align: center; margin: 10px 0 6px; }
+    .sim-head h1 { font-size: 1.8rem; }
+  </style>
+</head>
+<body>
+  <div class="sim-wrap">
+    <div class="sim-head">
+      <h1>🧪 Simulação — fase de grupos</h1>
+      <p class="section__hint" id="simSummary"></p>
+    </div>
+
+    <section class="sim-sec">
+      <h2>1. Checagens automáticas (pontuação, multiplicadores, desempate, travamento)</h2>
+      <div id="simChecks"></div>
+    </section>
+
+    <section class="sim-sec">
+      <h2>2. Ranking dos 23 (motor real + desempate)</h2>
+      <div id="simRanking"></div>
+    </section>
+
+    <section class="sim-sec">
+      <h2>3. Palpites da galera (revela só jogo já iniciado)</h2>
+      <div id="simGalera"></div>
+    </section>
+
+    <section class="sim-sec">
+      <h2>4. Dashboard do líder (pontos por jogo)</h2>
+      <div id="simDash"></div>
+    </section>
+  </div>
+
+  <!-- Dados + motor reais; a simulação é isolada (não usa o Supabase) -->
+  <script src="../data/matches.js"></script>
+  <script src="../assets/js/scoring.js"></script>
+  <script src="simulacao.js"></script>
+</body>
+</html>

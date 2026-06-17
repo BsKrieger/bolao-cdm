@@ -1,5 +1,11 @@
-/* Testes do motor de pontuação / scoring engine tests.
-   Abra tests/scoring.test.html no navegador para ver o resultado. */
+/**
+ * @file Scoring engine tests / Testes do motor de pontuação.
+ *
+ * EN: Open tests/scoring.test.html in the browser to see the result.
+ * PT-BR: Abra tests/scoring.test.html no navegador para ver o resultado.
+ *
+ * @author Bruno Krieger
+ */
 (function () {
   const cases = [];
   function eq(name, got, exp) { cases.push({ name, ok: got === exp, got, exp }); }
@@ -20,7 +26,7 @@
   eq("avanço na final = 0", Scoring.scoreAdvance({ advances: "home" }, { advances: "home" }, "final"), 0);
 
   // ---- scoreMatch (com multiplicador) ----
-  eq("32-avos exato ×1,25 = 12,5", Scoring.scoreMatch({ phase: "r32" }, { home: 1, away: 0 }, { home: 1, away: 0 }).total, 12.5);
+  eq("16-avos exato ×1,25 = 12,5", Scoring.scoreMatch({ phase: "r32" }, { home: 1, away: 0 }, { home: 1, away: 0 }).total, 12.5);
   eq("semi: placar 8 + avanço 2 ×2,5 = 25", Scoring.scoreMatch({ phase: "sf" }, { home: 2, away: 0, advances: "home" }, { home: 3, away: 1, advances: "home" }).total, 25);
   eq("final exato ×3 = 30", Scoring.scoreMatch({ phase: "final" }, { home: 2, away: 1 }, { home: 2, away: 1 }).total, 30);
   eq("grupos exato ×1 = 10", Scoring.scoreMatch({ phase: "group" }, { home: 0, away: 0 }, { home: 0, away: 0 }).total, 10);

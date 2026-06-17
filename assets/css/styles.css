@@ -1,59 +1,67 @@
-/* =========================================================================
-   Bolão da Copa 2026 — estilos globais / global styles
-   Sem framework. CSS variables para tema. Mobile-first.
-   ========================================================================= */
+/**
+ * @file Global styles / Estilos globais — Bolão da Copa 2026.
+ *
+ * EN: "Neon Noir" identity: near-black background + electric chartreuse green.
+ *     100% dark theme. The whole site is colored by CSS variables (tokens), so
+ *     the redesign lives here: change the values and the components follow.
+ * PT-BR: Identidade "Neon Noir": fundo quase-preto + verde chartreuse elétrico.
+ *        Tema 100% escuro. Todo o site é colorido por CSS variables (tokens),
+ *        então o redesign vive aqui: mudam os valores, os componentes seguem.
+ *
+ * @author Bruno Krieger
+ */
 
 /* --- Design tokens / tema --- */
 :root {
-  --color-bg: #0f1226;
-  --color-bg-soft: #181b35;
-  --color-surface: #1f2342;
-  --color-surface-2: #262b4f;
-  --color-text: #f3f4ff;
-  --color-text-muted: #a7acce;
-  --color-primary: #00c389;       /* verde campo / pitch green */
-  --color-primary-dark: #00a073;
-  --color-accent: #ffd23f;        /* amarelo / yellow */
-  --color-gold: #ffd23f;
-  --color-silver: #cfd6e6;
-  --color-bronze: #e0935b;
-  --color-border: rgba(255, 255, 255, 0.08);
+  /* Fundos / backgrounds */
+  --color-bg: #0d0d0d;          /* fundo principal / page */
+  --color-surface: #141414;     /* cards e seções / cards */
+  --color-surface-2: #1e1e1e;   /* hover / elevated */
+  --color-bg-soft: #1e1e1e;     /* inputs / inputs */
 
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --maxw: 1080px;
+  /* Texto / text */
+  --color-text: #ffffff;
+  --color-text-muted: #8a8a8a;
+  --color-text-faint: #4d4d4d;
 
-  /* Fontes nativas: sem dependência externa, funciona offline / no-network */
-  --font: system-ui, "Segoe UI", -apple-system, Roboto, Helvetica, Arial,
-    sans-serif;
-  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui,
-    -apple-system, Roboto, sans-serif;
+  /* Accent — verde chartreuse (cor única da marca) / single brand accent */
+  --color-primary: #c4ff4d;
+  --color-primary-dark: #a1e510; /* hover do accent */
+  --color-accent: #c4ff4d;       /* alias: identidade de cor única */
+  --color-on-accent: #0d0d0d;    /* texto sobre o accent / text on accent */
+  --color-accent-glow: rgba(196, 255, 77, 0.15);
+
+  /* Pódio / podium */
+  --color-gold: #c4ff4d;         /* 1º = cor da marca (campeão brilha) */
+  --color-silver: #b8c0cc;
+  --color-bronze: #c08552;
+
+  /* Bordas / borders */
+  --color-border: #2a2a2a;
+  --color-border-accent: rgba(196, 255, 77, 0.30);
+
+  /* Alerta / danger — destaque de "fechado" e "não pontuou" / closed & zero-score */
+  --color-danger: #ff5a4d;
+  --color-danger-glow: rgba(255, 90, 77, 0.15);
+
+  /* Forma / shape — angular, look esportivo (máx 8px) */
+  --radius: 8px;
+  --radius-sm: 4px;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 24px var(--color-accent-glow);
+  --maxw: 1140px;
+
+  /* Tipografia / typography */
+  --font: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  /* Linhas do "campo" no fundo / faint pitch grid */
+  --field-line: rgba(255, 255, 255, 0.03);
 }
 
-/* --- Tema claro / light theme (escuro é o padrão) --- */
-:root[data-theme="light"] {
-  --color-bg: #eef1f7;
-  --color-bg-soft: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-2: #e9edf5;
-  --color-text: #14172a;
-  --color-text-muted: #5b6178;
-  --color-primary: #00a073;
-  --color-primary-dark: #008a63;
-  --color-accent: #c98a00;
-  --color-border: rgba(0, 0, 0, 0.12);
-  --shadow: 0 10px 30px rgba(20, 30, 60, 0.12);
-}
-
-:root[data-theme="light"] .flag {
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
-}
-
-:root[data-theme="light"] .status--locked,
-:root[data-theme="light"] .modal__error {
-  color: #c0392b;
-}
+/* Site dark-only: não há tema claro. Se um dia voltar, definir aqui um bloco
+   :root[data-theme="light"] e reativar um seletor de tema. */
 
 /* --- Reset enxuto / minimal reset --- */
 *,
@@ -70,12 +78,23 @@ body {
   margin: 0;
   font-family: var(--font);
   color: var(--color-text);
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(0, 195, 137, 0.18), transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, rgba(255, 210, 63, 0.12), transparent 55%),
-    var(--color-bg);
+  background: var(--color-bg);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Grade sutil de "campo" cobrindo o site todo / subtle full-page pitch grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--field-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--field-line) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 a {
@@ -87,33 +106,49 @@ h1,
 h2,
 h3 {
   margin: 0;
-  line-height: 1.15;
+  line-height: 1.05;
   font-family: var(--font-display);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
-/* --- Top bar --- */
+/* --- Top bar (sticky, blur) --- */
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 18px 20px;
+  /* full-width com conteúdo centralizado no maxw / centered content */
+  padding: 13px max(20px, calc((100% - var(--maxw)) / 2));
+  background: rgba(13, 13, 13, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Borda aparece ao rolar (classe via anim.js) / border on scroll */
+.topbar.is-scrolled {
+  border-bottom-color: var(--color-border);
+  background: rgba(13, 13, 13, 0.96);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
 .brand__logo {
-  height: 40px;
+  height: 38px;
   width: auto;
   display: block;
 }
@@ -124,104 +159,196 @@ h3 {
 
 .topnav {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .topnav__link {
+  position: relative;
   padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  font-weight: 500;
   color: var(--color-text-muted);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Sublinhado animado no hover / animated underline on hover */
+.topnav__link::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 5px;
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
 }
 
 .topnav__link:hover {
-  background: var(--color-surface);
   color: var(--color-text);
+}
+
+.topnav__link:hover::after {
+  transform: scaleX(1);
 }
 
 .topnav__link.is-active {
   background: var(--color-primary);
-  color: #04201a;
-  font-weight: 600;
+  color: var(--color-on-accent);
+  font-weight: 700;
+}
+
+.topnav__link.is-active::after {
+  display: none;
 }
 
 /* --- Hero --- */
 .hero {
+  position: relative;
+  overflow: hidden;
   max-width: var(--maxw);
-  margin: 20px auto 0;
-  padding: 56px 20px 40px;
+  margin: 24px auto 0;
+  padding: 64px 20px 48px;
   text-align: center;
 }
 
+/* Grade do campo concentrada na hero / denser pitch grid in the hero */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--field-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--field-line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(closest-side at 50% 35%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 50% 35%, #000 55%, transparent 100%);
+}
+
+/* Brilho neon sutil atrás do título / subtle neon glow */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  width: 620px;
+  height: 420px;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side, var(--color-accent-glow), transparent 70%);
+  filter: blur(36px);
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Entrada escalonada dos elementos da hero / staggered hero entrance */
+.hero__inner > * {
+  animation: slideUp 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hero__inner > *:nth-child(1) { animation-delay: 0.05s; }
+.hero__inner > *:nth-child(2) { animation-delay: 0.15s; }
+.hero__inner > *:nth-child(3) { animation-delay: 0.25s; }
+.hero__inner > *:nth-child(4) { animation-delay: 0.35s; }
+.hero__inner > *:nth-child(5) { animation-delay: 0.45s; }
+.hero__inner > *:nth-child(6) { animation-delay: 0.55s; }
+
 .hero__logo {
-  width: 138px;
-  height: 138px;
+  width: 128px;
+  height: 128px;
   object-fit: contain;
   display: block;
   margin: 0 auto 22px;
-  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 0 26px var(--color-accent-glow));
+}
+
+.hero__eyebrow {
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 9vw, 6rem);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .hero__title-accent {
   color: var(--color-accent);
 }
 
-.hero__eyebrow {
-  display: inline-block;
-  margin: 0 0 16px;
-  padding: 6px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.hero__title {
-  font-size: clamp(2.2rem, 6vw, 3.6rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
 .hero__subtitle {
-  max-width: 620px;
-  margin: 18px auto 0;
+  max-width: 650px;
+  margin: 20px auto 0;
   color: var(--color-text-muted);
-  font-size: 1.1rem;
+  font-size: 1.12rem;
 }
 
 /* --- Estatísticas / stats --- */
+/* Grade de colunas iguais: todos os cards do mesmo tamanho, ocupando a largura
+   toda. No mobile vira 2 colunas (ver media query). / equal-width grid. */
 .stats {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr; /* todas as linhas com a mesma altura / equal-height rows */
   gap: 14px;
-  margin: 32px auto 0;
+  margin: 36px auto 0;
 }
 
 .stat {
-  min-width: 120px;
-  padding: 16px 22px;
+  position: relative;
+  min-width: 0; /* permite o card encolher na grade / lets the card shrink */
+  padding: 18px 22px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.stat:hover {
+  border-color: var(--color-border-accent);
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-glow);
 }
 
 .stat__value {
-  font-size: 1.6rem;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  font-weight: 700;
   color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
 }
 
 .stat__label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
   color: var(--color-text-muted);
+  text-transform: uppercase;
 }
 
 /* --- Botões / buttons --- */
@@ -230,16 +357,22 @@ h3 {
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 32px;
+  margin-top: 36px;
 }
 
 .btn {
-  display: inline-block;
-  padding: 13px 26px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background-color 0.12s ease, border-color 0.15s ease;
 }
 
 .btn:active {
@@ -248,54 +381,72 @@ h3 {
 
 .btn--primary {
   background: var(--color-primary);
-  color: #04201a;
-  box-shadow: 0 8px 20px rgba(0, 195, 137, 0.35);
+  color: var(--color-on-accent);
+  border: 1px solid var(--color-primary);
 }
 
 .btn--primary:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-primary-dark);
   background: var(--color-primary-dark);
+  box-shadow: var(--shadow-glow);
 }
 
 .btn--ghost {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius);
   color: var(--color-text);
 }
 
 .btn--ghost:hover {
-  background: var(--color-surface);
+  transform: translateY(-4px);
+  border-color: var(--color-border-accent);
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-glow);
 }
 
 /* --- Seções genéricas / sections --- */
 .section {
   max-width: var(--maxw);
-  margin: 28px auto;
+  margin: 40px auto;
   padding: 0 20px;
 }
 
 .section__title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
   margin-bottom: 6px;
 }
 
 .section__hint {
   color: var(--color-text-muted);
-  margin: 0 0 18px;
+  margin: 0 0 20px;
+}
+
+.section__hint strong {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
 }
 
 /* --- Layout de página interna / inner page layout --- */
 .page {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 24px 20px 60px;
+  padding: 28px 20px 64px;
 }
 
 .page__head {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .page__title {
-  font-size: 1.8rem;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .page__sub {
@@ -308,14 +459,21 @@ h3 {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 40px 24px;
+  padding: 44px 24px;
   text-align: center;
 }
 
 .empty__icon {
   font-size: 2.4rem;
+  line-height: 1;
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  color: var(--color-accent);
+}
+
+/* Ícone de alerta no estado vazio fica vermelho / warning icon goes red */
+.empty__icon.ti-alert-triangle {
+  color: var(--color-danger);
 }
 
 .empty p {
@@ -334,7 +492,7 @@ h3 {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 26px 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -354,51 +512,77 @@ h3 {
 .prize--silver::before { background: var(--color-silver); }
 .prize--bronze::before { background: var(--color-bronze); }
 
-.prize__medal {
-  font-size: 2rem;
+/* O campeão ganha um brilho discreto / champion gets a subtle glow */
+.prize--gold {
+  border-color: var(--color-border-accent);
+  box-shadow: var(--shadow-glow);
 }
+
+.prize__medal {
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.prize--gold .prize__medal { color: var(--color-gold); }
+.prize--silver .prize__medal { color: var(--color-silver); }
+.prize--bronze .prize__medal { color: var(--color-bronze); }
 
 .prize__place {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .prize__value {
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  font-weight: 700;
 }
 
 /* --- Cards de navegação / shortcut cards --- */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 16px;
 }
 
 .card {
   position: relative;
+  overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 22px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(0, 195, 137, 0.5);
+  transform: translateY(-4px);
+  border-color: var(--color-border-accent);
   background: var(--color-surface-2);
+  box-shadow: var(--shadow-glow);
 }
 
 .card__icon {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+/* Quando o ícone for Tabler / when the icon is a Tabler glyph */
+.card__icon.ti {
+  font-size: 1.9rem;
 }
 
 .card__title {
-  font-size: 1.15rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
 }
 
 .card__text {
@@ -411,12 +595,12 @@ h3 {
   position: absolute;
   top: 14px;
   right: 14px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-accent);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-sm);
   padding: 3px 8px;
 }
 
@@ -425,15 +609,15 @@ h3 {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 22px;
+  padding: 24px;
 }
 
 .scoring__list {
   list-style: none;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 10px;
 }
 
@@ -448,11 +632,12 @@ h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  padding: 4px 8px;
-  background: rgba(0, 195, 137, 0.15);
+  width: 50px;
+  padding: 5px 8px;
+  background: var(--color-accent-glow);
   color: var(--color-primary);
   border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 
@@ -463,20 +648,23 @@ h3 {
 
 .scoring__multipliers strong {
   color: var(--color-accent);
+  font-family: var(--font-mono);
 }
 
 /* --- Footer --- */
 .footer {
-  max-width: var(--maxw);
-  margin: 40px auto 24px;
-  padding: 24px 20px;
+  margin: 56px 0 0;
+  padding: 28px 20px;
+  background: #000000;
   border-top: 1px solid var(--color-border);
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* --- Responsivo / responsive --- */
 /* --- Bandeira (imagem) / flag image --- */
 .flag {
   width: 22px;
@@ -487,47 +675,26 @@ h3 {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-/* --- Botão de tema (claro/escuro) / theme toggle --- */
-.theme-toggle {
-  /* inline-flex centraliza o emoji nos 2 eixos (corrige o ícone torto no mobile) */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.theme-toggle:hover {
-  background: var(--color-surface-2);
-}
-
 /* --- Chip de perfil (cabeçalho) / profile chip (header) --- */
 .profile-chip {
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
-  height: 40px;
+  height: 38px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   padding: 0 16px;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .profile-chip:hover {
+  border-color: var(--color-border-accent);
   background: var(--color-surface-2);
 }
 
@@ -539,8 +706,8 @@ h3 {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(6, 8, 20, 0.72);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -553,21 +720,25 @@ h3 {
   max-width: 380px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-accent);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 28px 26px;
+  padding: 30px 26px;
   text-align: center;
 }
 
 .modal__logo {
-  width: 72px;
-  height: 72px;
+  width: 68px;
+  height: 68px;
   object-fit: contain;
   margin-bottom: 10px;
 }
 
 .modal__title {
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
@@ -604,39 +775,102 @@ h3 {
 .modal__save {
   width: 100%;
   margin-top: 14px;
+  justify-content: center;
+}
+
+/* =========================================================================
+   Animações / animations
+   Entrada com fade-up (CSS puro) + reveal no scroll (anim.js).
+   ========================================================================= */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(1.35); }
+}
+
+/* Reveal no scroll: só esconde se o anim.js estiver ativo (html.js-anim).
+   Se o JS falhar, o conteúdo aparece normalmente. / progressive enhancement */
+html.js-anim .reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+html.js-anim .reveal-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ponto "AO VIVO" piscando (utilitário) / live blinking dot */
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* Selo "Ao vivo" reutilizável (pílula verde) — usado em Jogos e Galera.
+   / reusable live badge pill, shared by Jogos and Galera. */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px;
+  border: 1px solid var(--color-border-accent);
+  border-radius: 999px;
+  background: var(--color-bg-soft);
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 /* --- Responsivo / responsive --- */
 @media (max-width: 640px) {
-  /* Cabeçalho em 2 faixas: marca + controles em cima, menu numa linha embaixo */
+  /* Cabeçalho em 2 faixas: marca + perfil em cima, menu rolável embaixo */
   .topbar {
     padding: 12px 16px;
     gap: 10px;
   }
 
   .brand {
-    margin-right: auto; /* empurra tema/perfil p/ a direita, sem importar a quantidade */
+    margin-right: auto; /* empurra o perfil p/ a direita */
+    font-size: 1.2rem;
   }
 
   .brand__logo {
-    height: 34px;
+    height: 32px;
   }
 
-  /* Menu vira faixa rolável de UMA linha (em vez de quebrar desalinhado) */
+  /* Menu vira faixa rolável de UMA linha / single scrollable row */
   .topnav {
     order: 3;
     flex: 1 0 100%;
     flex-wrap: nowrap;
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
-    margin: 2px -16px -4px; /* sangra até as bordas da tela */
+    margin: 2px -16px -4px;
     padding: 2px 16px 6px;
-    scrollbar-width: none; /* Firefox: esconde a barra */
-    -webkit-overflow-scrolling: touch; /* rolagem suave no iOS */
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .topnav::-webkit-scrollbar {
-    display: none; /* Chrome/Safari: esconde a barra */
+    display: none;
   }
 
   .topnav__link {
@@ -644,14 +878,14 @@ h3 {
     white-space: nowrap;
   }
 
-  /* Hero mais compacto no celular */
+  /* Hero mais compacto / compact hero */
   .hero {
-    padding: 32px 18px 28px;
+    padding: 40px 18px 32px;
   }
 
   .hero__logo {
-    width: 104px;
-    height: 104px;
+    width: 96px;
+    height: 96px;
     margin-bottom: 16px;
   }
 
@@ -659,20 +893,29 @@ h3 {
     font-size: 1rem;
   }
 
-  /* Estatísticas em grade 2x2 alinhada (corrige larguras irregulares) */
+  /* Estatísticas em grade 2x2 / stats 2x2 grid */
   .stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 26px;
   }
 
   .stat {
-    min-width: 0;
-    padding: 14px 16px;
+    padding: 14px 14px;
   }
 
-  /* Botões da hero ocupando a largura toda */
+  /* Fontes menores p/ caber sem quebra feia (ex: "R$ 1.150") / fit cleanly */
+  .stat__value {
+    font-size: 1.4rem;
+  }
+
+  .stat__label {
+    font-size: 0.74rem;
+    letter-spacing: 0;
+  }
+
+  /* Botões ocupando a largura toda / full-width buttons */
   .hero__actions {
     flex-direction: column;
     gap: 10px;
@@ -680,12 +923,32 @@ h3 {
 
   .hero__actions .btn {
     width: 100%;
+    justify-content: center;
   }
 
-  /* Premiação, atalhos e resumo de pontos em coluna única */
+  .page__title { font-size: 2rem; }
+  .section__title { font-size: 1.6rem; }
+
+  /* Tudo em coluna única / single column */
   .prizes,
   .cards,
   .scoring__list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* --- Acessibilidade: respeita "menos animação" / reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  html.js-anim .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

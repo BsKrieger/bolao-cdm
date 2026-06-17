@@ -1,7 +1,11 @@
-/* =========================================================================
-   Dashboard individual / Participant dashboard
-   Complementa styles.css (reusa .stats/.stat/.btn).
-   ========================================================================= */
+/**
+ * @file Participant dashboard / Dashboard individual — Neon Noir.
+ *
+ * EN: Complements styles.css (reuses .stats/.stat/.btn).
+ * PT-BR: Complementa styles.css (reusa .stats/.stat/.btn).
+ *
+ * @author Bruno Krieger
+ */
 
 /* Resumo alinhado à esquerda (reusa .stat) */
 .stats--dash {
@@ -9,51 +13,51 @@
   margin-top: 0;
 }
 
-/* Barra de progresso dos palpites */
+/* Barra de progresso dos palpites / predictions progress */
 .progress {
   height: 10px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  margin: 18px 0 8px;
+  margin: 20px 0 8px;
 }
 
 .progress__bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  border-radius: 999px;
-  transition: width 0.3s ease;
+  background: var(--color-primary);
+  box-shadow: var(--shadow-glow);
+  transition: width 0.4s ease;
 }
 
 .dash__note {
   color: var(--color-text-muted);
   font-size: 0.85rem;
-  margin: 0 0 26px;
+  margin: 0 0 28px;
 }
 
-/* .empty agora vive em styles.css (compartilhado) */
-
-/* Cards de palpites bônus */
+/* Cards de palpites bônus / bonus pick cards */
 .bonus-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
-  margin-bottom: 8px;
+  margin: 8px 0;
 }
 
 .bonus-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  border-radius: var(--radius);
+  padding: 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 .bonus-card__label {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--color-text-muted);
 }
 
@@ -65,6 +69,7 @@
 .bonus-card__value em {
   color: var(--color-primary);
   font-style: normal;
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 
@@ -77,19 +82,55 @@
   .bonus-cards { grid-template-columns: 1fr; }
 }
 
-/* Linha de resultado pontuado */
+/* Linha de resultado por jogo / scored match row.
+   Base = NÃO pontuou (destaque vermelho). .result--pos = pontuou (accent). */
 .result {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius);
+  padding: 14px 16px;
   margin-bottom: 10px;
+  box-shadow: 0 0 14px var(--color-danger-glow);
+  animation: fadeUp 0.4s ease both;
 }
 
 .result--pos {
   border-left-color: var(--color-primary);
+  box-shadow: none;
 }
+
+/* Pontuação MÁXIMA do jogo: card inteiro esverdeado / max score: green card.
+   Vem depois de --pos para sobrescrever borda/sombra. */
+.result--max {
+  border-color: var(--color-border-accent);
+  border-left-color: var(--color-primary);
+  background: rgba(196, 255, 77, 0.12);
+  box-shadow: var(--shadow-glow);
+}
+
+.result__max-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 1px 7px;
+  background: var(--color-primary);
+  color: var(--color-on-accent);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+
+/* Ícones de veredito (avanço no mata-mata) / advancement verdict icons */
+.result__ok { color: var(--color-primary); }
+.result__bad { color: var(--color-danger); }
+.result__ok,
+.result__bad { vertical-align: -1px; }
 
 .result__main {
   display: flex;
@@ -104,17 +145,26 @@
 
 .result__teams b {
   margin: 0 6px;
+  font-family: var(--font-mono);
   color: var(--color-accent);
 }
 
 .result__pts {
   flex-shrink: 0;
+  font-family: var(--font-mono);
   font-weight: 700;
   color: var(--color-primary);
-  background: rgba(0, 195, 137, 0.14);
+  background: var(--color-accent-glow);
   border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  font-size: 0.95rem;
+  padding: 5px 10px;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+/* Jogo sem pontos: o quadrado de pontos fica avermelhado / zero-point badge red */
+.result:not(.result--pos) .result__pts {
+  color: var(--color-danger);
+  background: var(--color-danger-glow);
 }
 
 .result__sub,
@@ -131,4 +181,9 @@
 @media (max-width: 560px) {
   .result__main { flex-direction: column; align-items: flex-start; gap: 6px; }
   .result__teams { font-size: 0.9rem; }
+}
+
+.result:not(.result--pos) .result__pts {
+  color: var(--color-danger);
+  background: var(--color-danger-glow);
 }

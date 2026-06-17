@@ -1,6 +1,11 @@
-/* =========================================================================
-   Ranking / leaderboard — complementa styles.css
-   ========================================================================= */
+/**
+ * @file Ranking / leaderboard — complements styles.css (Neon Noir).
+ *
+ * EN: Complements styles.css (same Neon Noir identity).
+ * PT-BR: Complementa styles.css (mesma identidade Neon Noir).
+ *
+ * @author Bruno Krieger
+ */
 .rank {
   width: 100%;
   border-collapse: collapse;
@@ -12,17 +17,28 @@
 
 .rank th,
 .rank td {
-  padding: 12px 14px;
+  padding: 14px 14px;
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
 
 .rank thead th {
   background: var(--color-surface-2);
-  font-size: 0.8rem;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
   color: var(--color-text-muted);
+}
+
+.rank tbody tr {
+  animation: fadeUp 0.4s ease both;
+}
+
+/* hover só nas linhas de participante (não na linha do gráfico) */
+.rank tbody tr.rank__row:hover {
+  background: var(--color-surface-2);
 }
 
 .rank tbody tr:last-child td {
@@ -30,18 +46,90 @@
 }
 
 .rank__pos {
-  width: 52px;
+  width: 56px;
   text-align: center;
+  font-family: var(--font-mono);
   font-weight: 700;
   font-size: 1.05rem;
+  color: var(--color-text-muted);
 }
 
+/* Medalhas (ícones) do pódio / podium medal icons */
+.rank__medal {
+  font-size: 1.35rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.rank__medal--gold { color: var(--color-gold); }
+.rank__medal--silver { color: var(--color-silver); }
+.rank__medal--bronze { color: var(--color-bronze); }
+
+/* Pódio: barra lateral por CLASSE (imune a linhas de gráfico inseridas) */
+.rank__row--gold .rank__pos { border-left: 3px solid var(--color-gold); }
+.rank__row--silver .rank__pos { border-left: 3px solid var(--color-silver); }
+.rank__row--bronze .rank__pos { border-left: 3px solid var(--color-bronze); }
+
+/* O líder ganha um brilho discreto / leader gets a subtle glow */
+.rank__row--gold { background: var(--color-accent-glow); }
+
+/* --- Variação de posição / position movement --- */
+.rank__delta {
+  width: 58px;
+  text-align: center;
+}
+
+.rank__move {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.rank__move .ti { font-size: 0.95rem; }
+.rank__move--up { color: var(--color-primary); }      /* subiu = verde chartreuse */
+.rank__move--down { color: var(--color-danger); }     /* caiu = vermelho */
+.rank__move--same { color: var(--color-text); }       /* igual = hífen branco */
+
+/* --- Nome clicável (abre o gráfico) / clickable name --- */
 .rank__name {
   font-weight: 600;
 }
 
+.rank__namebtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.rank__namebtn:hover { color: var(--color-accent); }
+
+.rank__namechev {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.rank__namebtn[aria-expanded="true"] .rank__namechev {
+  transform: rotate(180deg);
+  color: var(--color-accent);
+}
+
 .rank__pts {
+  font-family: var(--font-mono);
   font-weight: 700;
+  font-size: 1.05rem;
   color: var(--color-primary);
   white-space: nowrap;
 }
@@ -49,11 +137,12 @@
 .rank__sub {
   width: 80px;
   text-align: center;
+  font-family: var(--font-mono);
   color: var(--color-text-muted);
 }
 
 .rank__row--me {
-  background: rgba(0, 195, 137, 0.12);
+  background: rgba(196, 255, 77, 0.10);
 }
 
 .rank__row--me .rank__name::after {
@@ -62,11 +151,78 @@
   font-weight: 600;
 }
 
+/* --- Sub-linha do gráfico de evolução / evolution chart sub-row --- */
+.rank__chartrow td {
+  background: var(--color-bg-soft);
+  padding: 18px;
+}
+
+.rank__chart-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 10px;
+}
+
+.rank__chart-cap {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.rank__chart-cap strong {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}
+
+.rank__chart-empty {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* SVG do gráfico / chart SVG */
+.rchart__svg {
+  width: 100%;
+  height: auto;
+  max-width: 700px;
+  display: block;
+}
+
+.rchart__grid { stroke: var(--color-border); stroke-width: 1; }
+
+.rchart__ylabel {
+  fill: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-anchor: end;
+}
+
+.rchart__xlabel {
+  fill: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.rchart__line {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.rchart__dot { fill: var(--color-primary); }
+
 .rank-loading {
   color: var(--color-text-muted);
   padding: 20px 2px;
 }
 
 @media (max-width: 560px) {
-  .rank th, .rank td { padding: 10px 8px; }
+  .rank th, .rank td { padding: 11px 7px; }
+  .rank__delta { width: 44px; }
+  .rank__sub { width: 46px; }
+  .rank__namechev { display: none; }
 }

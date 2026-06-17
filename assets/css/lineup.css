@@ -1,0 +1,325 @@
+/**
+ * @file Lineups / Escalações — button + pitch map. Complements styles.css.
+ *
+ * EN: Button, pitch map, cards, "Ao vivo" badge and the stats panel. Complements
+ *     styles.css (same Neon Noir identity).
+ * PT-BR: Botão, mapa do campo, cartões, selo "Ao vivo" e o painel de
+ *        estatísticas. Complementa styles.css (mesma identidade Neon Noir).
+ *
+ * @author Bruno Krieger
+ */
+
+.lineup-wrap {
+  margin-top: 12px;
+}
+
+.lineup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.lineup-btn:hover {
+  border-color: var(--color-border-accent);
+  color: var(--color-accent);
+}
+
+.lineup-btn .ti {
+  font-size: 0.95rem;
+}
+
+.lineup-box {
+  margin: 12px 0 20px; /* espaço extra embaixo: separa do bloco de palpites */
+}
+
+.lineup-box:empty {
+  margin: 0;
+}
+
+.lineup__msg {
+  margin: 0;
+  padding: 14px 4px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.lineup__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+}
+
+.lineup__team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lineup__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.lineup__dot--home { background: var(--color-accent); }
+.lineup__dot--away { background: #e9e9ef; }
+
+/* --- O campo (SVG) / the pitch --- */
+/* Campo + estatísticas lado a lado p/ caber tudo na tela; empilha no mobile.
+   / field + stats side by side, stacks on mobile. */
+.lineup-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;       /* colunas com a MESMA altura / equal heights */
+  gap: 16px 24px;
+}
+
+.lineup-grid__field {
+  flex: 1 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* o campo NÃO estica: fica estático quando as estatísticas expandem (Tudo/
+     Lances). Em "Resumo" o gráfico é que estica até a altura do campo. */
+  align-self: flex-start;
+}
+
+.lineup-grid__stats {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pitch {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.pitch__bg { fill: #0c1f17; }                 /* gramado escuro / dark turf */
+.pitch__stripe--a { fill: #0c1f17; }          /* faixas de corte / mowing stripes */
+.pitch__stripe--b { fill: #0e2218; }          /* contraste mais sutil */
+.pitch__line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1.5;
+}
+.pitch__spot { fill: rgba(255, 255, 255, 0.5); }
+
+.lp__circle--home { fill: var(--color-accent); stroke: rgba(0, 0, 0, 0.35); stroke-width: 1; }
+.lp__circle--away { fill: #eef0f4; stroke: rgba(0, 0, 0, 0.28); stroke-width: 1; }
+
+/* Expulso: bolinha + nome levemente apagados / sent off: faded */
+.lp--sentoff { opacity: 0.4; }
+
+/* Cartão ao lado do jogador / card next to the player */
+.lp__card { stroke: rgba(0, 0, 0, 0.55); stroke-width: 0.6; }
+.lp__card--yellow { fill: #ffd23f; }
+.lp__card--red { fill: #e5402e; }
+
+.lp__num {
+  fill: #0d0d0d;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+/* Nome com contorno escuro p/ ler bem sobre o gramado / dark outline */
+.lp__name {
+  fill: #ffffff;
+  font-family: var(--font);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgba(7, 20, 14, 0.92);
+  stroke-width: 2.6px;
+  stroke-linejoin: round;
+}
+
+/* --- Estatísticas do jogo / match stats panel (preenche a altura do campo) --- */
+.mstats {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-top: 2px;
+}
+
+/* Abas: Resumo / Tudo / Lances / tabs */
+.mstats__nav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.mstats__tab {
+  flex: 1;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 4px;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.mstats__tab:hover { color: var(--color-text); border-color: var(--color-border-accent); }
+
+.mstats__tab.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-accent);
+}
+
+/* Páginas (só a ativa aparece) / pages */
+.mstats__page { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.mstats__page[hidden] { display: none; }
+
+.mstats__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+/* As linhas se espalham p/ ocupar toda a altura (igual ao campo) / fill height */
+.mstats__rows {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mstat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mstat__v {
+  flex: 0 0 42px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.mstat__v:first-child { text-align: right; }
+.mstat__v:last-child { text-align: left; }
+
+.mstat__mid {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.mstat__label {
+  display: block;
+  margin-bottom: 2px;
+  line-height: 1.1;          /* rótulo compacto → mais espaço entre as barras */
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+  color: #b6b6b6;             /* mais claro que o muted, melhor leitura */
+}
+
+.mstat__bar {
+  display: flex;
+  height: 8px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+
+.mstat__fill { height: 100%; }
+.mstat__fill--h { background: var(--color-accent); }
+.mstat__fill--a { background: var(--color-silver); }
+
+/* Página "Tudo": linhas com espaçamento próprio + títulos de grupo / full page */
+.mstats__page[data-view="full"] .mstat { margin-bottom: 7px; }
+
+.mstats__group {
+  margin: 12px 0 7px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+}
+
+.mstats__page[data-view="full"] .mstats__group:first-of-type { margin-top: 0; }
+
+/* Página "Lances": linha do tempo / events timeline */
+.evs { display: flex; flex-direction: column; gap: 7px; }
+
+.ev {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px;
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  font-size: 0.85rem;
+}
+
+.ev--home { border-left-color: var(--color-accent); }
+.ev--away { border-left-color: var(--color-silver); }
+
+.ev__min {
+  flex: 0 0 40px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.ev__icon { flex: 0 0 auto; font-size: 1rem; color: var(--color-text); }
+.ev__desc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev__out { color: var(--color-text-muted); }
+
+.ev__card {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 9px;
+  height: 12px;
+  border-radius: 1px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.ev__card--yellow { background: #ffd23f; }
+.ev__card--red { background: #e5402e; }

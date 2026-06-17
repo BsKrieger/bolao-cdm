@@ -106,7 +106,7 @@ graph TD
     UI["UI por página<br/>jogos.js · participante.js · ranking.js"] --> COM
     UI --> SCORE["Motor de regras<br/>scoring.js"]
     UI --> STORE["Persistência<br/>storage.js"]
-    COM["Comuns<br/>app.js · theme.js · countdown.js"] --> STORE
+    COM["Comuns<br/>app.js · anim.js · countdown.js"] --> STORE
     STORE --> DBAD["Adaptador backend<br/>db.js"]
     SCORE --> DATA
     STORE --> DATA["Dados<br/>matches.js · teams.js · scorers.js · results.js"]
@@ -160,10 +160,12 @@ consomem. Exemplo de `jogos.html`:
 | `assets/js/db.js` | Backend | Adaptador Supabase (PostgREST via `fetch`) |
 | `assets/js/storage.js` | Persistência | `localStorage` + disparo de sync para o backend |
 | `assets/js/scoring.js` | Regras | Motor de pontuação (funções puras) |
-| `assets/js/app.js` | Comum | Helpers (bandeira, fuso, trava), perfil/cadastro |
-| `assets/js/theme.js` | Comum | Alternância tema claro/escuro |
+| `assets/js/app.js` | Comum | Helpers (bandeira, fuso, trava, `esc`, `fmtPts`), perfil/cadastro |
+| `assets/js/anim.js` | Comum | Animações de UI (reveal no scroll, contadores) |
 | `assets/js/countdown.js` | Comum | Contador regressivo + trava ao vivo |
 | `assets/js/jogos.js` | UI | Monta a tela de jogos e o bônus |
+| `assets/js/lineup.js` | UI | Escalações + estatísticas + selo "ao vivo" (API ESPN) |
+| `assets/js/galera.js` | UI | Palpites de todos por jogo |
 | `assets/js/participante.js` | UI | Monta o dashboard individual |
 | `assets/js/ranking.js` | UI | Monta o ranking |
 | `assets/css/*.css` | Estilo | `styles` (global) + um por página |
@@ -492,13 +494,7 @@ Pontos de estudo:
 - **`scheduleBonusAutoLock()`** fecha o bônus ao vivo no primeiro kickoff, com
   guarda contra o limite do `setTimeout` (~24,8 dias).
 
-### 7.6. `theme.js` — tema claro/escuro
-
-Roda **no `<head>`**, antes da página pintar, para não "piscar" o tema errado.
-Lê a preferência salva, aplica `data-theme` no `<html>` e injeta o botão na
-barra. O CSS faz o resto via variáveis (`:root[data-theme="light"] { ... }`).
-
-### 7.7. `supabase/functions/sync-results/index.ts` — automação
+### 7.6. `supabase/functions/sync-results/index.ts` — automação
 
 Edge Function em Deno (TypeScript) que roda na nuvem, agendada por cron. O
 coração dela é o **mapeamento** entre os jogos da API e os nossos `id`s:
@@ -559,7 +555,7 @@ function scoreLine(pred, res) {
 
 ### 8.2. Classificação no mata-mata — `scoreAdvance`
 
-Só vale nas fases de `KO_ADVANCE` (32-avos a semis). Dá **+2** se o lado que o
+Só vale nas fases de `KO_ADVANCE` (16-avos a semis). Dá **+2** se o lado que o
 palpiteiro marcou para avançar é o que realmente avançou (inclui decisão por
 pênaltis, porque comparamos `advances`, não o placar).
 
@@ -577,7 +573,7 @@ function scoreMatch(match, pred, res) {
 ```
 
 O total é **(placar + avanço) × multiplicador da fase**. Multiplicadores:
-grupos 1× · 32-avos 1,25× · oitavas 1,5× · quartas 2× · semis 2,5× · 3º lugar
+grupos 1× · 16-avos 1,25× · oitavas 1,5× · quartas 2× · semis 2,5× · 3º lugar
 2,5× · final 3×.
 
 ### 8.4. Total do participante — `scoreTotal`
