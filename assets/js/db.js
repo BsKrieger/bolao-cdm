@@ -1,18 +1,36 @@
-/* =========================================================================
-   Adaptador do Supabase / Supabase data adapter
-   ---------------------------------------------------------------------------
-   Fala com a API REST (PostgREST) via fetch — sem biblioteca externa.
-   Todas as funções são assíncronas (retornam Promise).
-   Se CONFIG estiver vazio, DB.ready() é false e o app roda 100% local.
-   ========================================================================= */
+/**
+ * @file Supabase data adapter / Adaptador do Supabase.
+ *
+ * EN: Talks to the REST API (PostgREST) via fetch — no external library. Every
+ *     function is async (returns a Promise). If CONFIG is empty, DB.ready() is
+ *     false and the app runs fully local.
+ * PT-BR: Fala com a API REST (PostgREST) via fetch — sem biblioteca externa.
+ *        Todas as funções são assíncronas (retornam Promise). Se CONFIG estiver
+ *        vazio, DB.ready() é false e o app roda 100% local.
+ *
+ * @author Bruno Krieger
+ */
 const DB = (() => {
   const URL = (typeof CONFIG !== "undefined" && CONFIG.SUPABASE_URL)
     ? CONFIG.SUPABASE_URL.replace(/\/+$/, "") : "";
   const KEY = (typeof CONFIG !== "undefined" && CONFIG.SUPABASE_KEY)
     ? CONFIG.SUPABASE_KEY : "";
 
+  /**
+   * Whether the backend is configured and usable.
+   * Se o backend está configurado e utilizável.
+   *
+   * @returns {boolean}
+   */
   function ready() { return !!(URL && KEY); }
 
+  /**
+   * Builds the auth headers, optionally merged with extras.
+   * Monta os cabeçalhos de autenticação, mesclando com extras.
+   *
+   * @param {Object} [extra] - Extra headers / Cabeçalhos extras.
+   * @returns {Object}
+   */
   function headers(extra) {
     return Object.assign(
       { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" },
@@ -20,7 +38,14 @@ const DB = (() => {
     );
   }
 
-  // Chamada REST genérica / generic REST call.
+  /**
+   * Generic REST call against /rest/v1/. Throws on non-2xx.
+   * Chamada REST genérica contra /rest/v1/. Lança erro em status não-2xx.
+   *
+   * @param {string} path - Path + query after /rest/v1/ / Caminho + query.
+   * @param {RequestInit} options - Fetch options / Opções do fetch.
+   * @returns {Promise<*>} Parsed JSON or null / JSON lido ou null.
+   */
   async function rest(path, options) {
     const res = await fetch(URL + "/rest/v1/" + path, options);
     if (!res.ok) {
@@ -31,7 +56,15 @@ const DB = (() => {
     return text ? JSON.parse(text) : null;
   }
 
-  // ---- Participantes / participants ----
+  // ---- Participants / participantes ----
+
+  /**
+   * Finds a participant by exact name.
+   * Busca um participante pelo nome exato.
+   *
+   * @param {string} name - Participant name / Nome do participante.
+   * @returns {Promise<Object|null>}
+   */
   async function findParticipant(name) {
     const rows = await rest(
       "participants?select=*&name=eq." + encodeURIComponent(name),
@@ -40,7 +73,14 @@ const DB = (() => {
     return (rows && rows[0]) || null;
   }
 
-  // Login (nome+código) ou cadastro no 1º acesso / login or first-time register.
+  /**
+   * Logs in (name + code) or registers on first access.
+   * Faz login (nome + código) ou cadastra no primeiro acesso.
+   *
+   * @param {string} name - Participant name / Nome do participante.
+   * @param {string} code - Personal code / Código pessoal.
+   * @returns {Promise<{ok:boolean, participant?:Object, error?:string}>}
+   */
   async function loginOrRegister(name, code) {
     const existing = await findParticipant(name);
     if (existing) {
@@ -57,7 +97,15 @@ const DB = (() => {
     return { ok: true, participant: created[0] };
   }
 
-  // ---- Palpites / predictions ----
+  // ---- Predictions / palpites ----
+
+  /**
+   * Pulls a participant's predictions, indexed by match id.
+   * Puxa os palpites de um participante, indexados por id de jogo.
+   *
+   * @param {string|number} participantId - Participant id / Id do participante.
+   * @returns {Promise<Object<number, {home:number, away:number, advances?:string}>>}
+   */
   async function pullPredictions(participantId) {
     const rows = await rest(
       "predictions?select=*&participant_id=eq." + participantId,
@@ -70,6 +118,15 @@ const DB = (() => {
     return map;
   }
 
+  /**
+   * Upserts one prediction (merge on participant_id + match_id).
+   * Insere/atualiza um palpite (merge por participant_id + match_id).
+   *
+   * @param {string|number} participantId - Participant id / Id do participante.
+   * @param {number} matchId - Match id / Id do jogo.
+   * @param {{home?:number, away?:number, advances?:string}} fields - Fields / Campos.
+   * @returns {Promise<void>}
+   */
   async function pushPrediction(participantId, matchId, fields) {
     const body = {
       participant_id: participantId,
@@ -86,7 +143,15 @@ const DB = (() => {
     });
   }
 
-  // ---- Bônus / bonus ----
+  // ---- Bonus / bônus ----
+
+  /**
+   * Pulls a participant's bonus picks.
+   * Puxa os palpites bônus de um participante.
+   *
+   * @param {string|number} participantId - Participant id / Id do participante.
+   * @returns {Promise<{champion?:string, topScorer?:string}>}
+   */
   async function pullBonus(participantId) {
     const rows = await rest(
       "bonus?select=*&participant_id=eq." + participantId,
@@ -96,6 +161,14 @@ const DB = (() => {
     return b ? { champion: b.champion, topScorer: b.top_scorer } : {};
   }
 
+  /**
+   * Upserts a participant's bonus picks (merge on participant_id).
+   * Insere/atualiza os palpites bônus (merge por participant_id).
+   *
+   * @param {string|number} participantId - Participant id / Id do participante.
+   * @param {{champion?:string, topScorer?:string}} fields - Fields / Campos.
+   * @returns {Promise<void>}
+   */
   async function pushBonus(participantId, fields) {
     const body = {
       participant_id: participantId,
@@ -110,7 +183,14 @@ const DB = (() => {
     });
   }
 
-  // ---- Resultados reais (preenchidos pela automação/admin) / actual results ----
+  // ---- Actual results (filled by the automation/admin) / resultados reais ----
+
+  /**
+   * Fetches the official results, indexed by match id.
+   * Busca os resultados oficiais, indexados por id de jogo.
+   *
+   * @returns {Promise<Object<number, {home:number, away:number, advances?:string}>>}
+   */
   async function fetchResults() {
     const rows = await rest("results?select=*", { headers: headers() });
     const map = {};
@@ -120,13 +200,26 @@ const DB = (() => {
     return map;
   }
 
+  /**
+   * Fetches the final tournament outcome (champion + top scorer).
+   * Busca o resultado final do torneio (campeão + artilheiro).
+   *
+   * @returns {Promise<{champion?:string, topScorer?:string}|null>}
+   */
   async function fetchTournamentResult() {
     const rows = await rest("tournament_result?select=*&limit=1", { headers: headers() });
     const r = rows && rows[0];
     return r ? { champion: r.champion, topScorer: r.top_scorer } : null;
   }
 
-  // ---- Tudo, para o ranking / everything, for the ranking ----
+  // ---- Everything, for the ranking / tudo, para o ranking ----
+
+  /**
+   * Fetches participants, predictions and bonus in parallel.
+   * Busca participantes, palpites e bônus em paralelo.
+   *
+   * @returns {Promise<{participants:Array, predictions:Array, bonus:Array}>}
+   */
   async function fetchAll() {
     const [participants, predictions, bonus] = await Promise.all([
       rest("participants?select=*", { headers: headers() }),

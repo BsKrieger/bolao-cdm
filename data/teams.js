@@ -1,9 +1,15 @@
-/* =========================================================================
-   Seleções e bandeiras / Teams and flags — Copa do Mundo 2026
-   Mapa nome (PT-BR) -> código ISO do país (para a imagem da bandeira).
-   As bandeiras são imagens (flagcdn.com) porque emojis de bandeira NÃO
-   renderizam no Windows (aparecem como "BR", "MX"...). Ver flagOf() em app.js.
-   ========================================================================= */
+/**
+ * @file Teams and flags / Seleções e bandeiras — Copa do Mundo 2026.
+ *
+ * EN: Map of name (PT-BR) → country ISO code (for the flag image). Flags are
+ *     images (flagcdn.com) because flag emojis do NOT render on Windows. See
+ *     flagOf() in app.js.
+ * PT-BR: Mapa nome (PT-BR) → código ISO do país (para a imagem da bandeira). As
+ *        bandeiras são imagens (flagcdn.com) porque emojis de bandeira NÃO
+ *        renderizam no Windows. Ver flagOf() em app.js.
+ *
+ * @author Bruno Krieger
+ */
 const TEAMS = {
   // Grupo A
   "México": "mx",

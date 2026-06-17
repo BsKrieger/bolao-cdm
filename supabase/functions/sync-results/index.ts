@@ -1,39 +1,50 @@
-// =========================================================================
-// Sync de resultados / Results sync — Supabase Edge Function (Deno)
-// Busca os jogos encerrados na football-data.org e grava placar + quem
-// avançou na tabela `results` (e campeã/artilheiro em `tournament_result`).
-// Roda agendada (cron). Escreve via service role (ignora RLS).
-//
-// Secrets necessários (Edge Functions → Secrets):
-//   FOOTBALL_DATA_TOKEN  -> token da football-data.org
-// (SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são injetados automaticamente)
-// =========================================================================
+/**
+ * @file Results sync / Sync de resultados — Supabase Edge Function (Deno).
+ *
+ * EN: Source is ESPN's public API (FREE, no key). Reads the World Cup games,
+ *     takes the FINISHED ones and writes score + who advanced to the `results`
+ *     table (and the champion to `tournament_result`). Runs on a cron, writes
+ *     via the service role (bypasses RLS). No API secret needed — ESPN is open;
+ *     SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected by Supabase.
+ *     The ESPN→our-id map reuses the already-validated UTC times and names; no
+ *     match_id is changed.
+ * PT-BR: Fonte: API pública da ESPN (GRATUITA, sem chave). Lê os jogos da Copa,
+ *        pega os ENCERRADOS e grava placar + quem avançou na tabela `results`
+ *        (e a campeã em `tournament_result`). Roda agendada (cron), escreve via
+ *        service role (ignora RLS). Não precisa de secret — a ESPN é aberta;
+ *        SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são injetados pelo Supabase. O
+ *        mapa ESPN→nossos IDs reaproveita os horários (UTC) e nomes já
+ *        validados; nenhum match_id é alterado.
+ *
+ * @author Bruno Krieger
+ */
 
-const FD_TOKEN = Deno.env.get("FOOTBALL_DATA_TOKEN")!;
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const STAGE: Record<string, string> = {
-  GROUP_STAGE: "group", LAST_32: "r32", LAST_16: "r16",
-  QUARTER_FINALS: "qf", SEMI_FINALS: "sf", THIRD_PLACE: "third", FINAL: "final",
-};
-const KO_ADVANCE = new Set(["r32", "r16", "qf", "sf"]);
+const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
+// A ESPN limita ~100 eventos por chamada; busco em blocos de datas. / fetch in chunks.
+const RANGES = ["20260611-20260627", "20260628-20260710", "20260711-20260719"];
 
-const EN_TO_PT: Record<string, string> = {
+// Nome do time na ESPN -> português. Igual ao nosso mapa, com 2 ajustes
+// (ESPN usa "Cape Verde" e "Türkiye"). / ESPN displayName -> PT.
+const ESPN_TO_PT: Record<string, string> = {
   "Algeria": "Argélia", "Argentina": "Argentina", "Australia": "Austrália",
   "Austria": "Áustria", "Belgium": "Bélgica", "Bosnia-Herzegovina": "Bósnia e Herzegovina",
-  "Brazil": "Brasil", "Canada": "Canadá", "Cape Verde Islands": "Cabo Verde",
-  "Colombia": "Colômbia", "Congo DR": "RD Congo", "Croatia": "Croácia",
-  "Curaçao": "Curaçao", "Czechia": "Tchéquia", "Ecuador": "Equador", "Egypt": "Egito",
-  "England": "Inglaterra", "France": "França", "Germany": "Alemanha", "Ghana": "Gana",
-  "Haiti": "Haiti", "Iran": "Irã", "Iraq": "Iraque", "Ivory Coast": "Costa do Marfim",
-  "Japan": "Japão", "Jordan": "Jordânia", "Mexico": "México", "Morocco": "Marrocos",
-  "Netherlands": "Países Baixos", "New Zealand": "Nova Zelândia", "Norway": "Noruega",
-  "Panama": "Panamá", "Paraguay": "Paraguai", "Portugal": "Portugal", "Qatar": "Catar",
+  "Brazil": "Brasil", "Canada": "Canadá", "Cape Verde": "Cabo Verde",
+  "Cape Verde Islands": "Cabo Verde", "Colombia": "Colômbia", "Congo DR": "RD Congo",
+  "Croatia": "Croácia", "Curaçao": "Curaçao", "Czechia": "Tchéquia", "Ecuador": "Equador",
+  "Egypt": "Egito", "England": "Inglaterra", "France": "França", "Germany": "Alemanha",
+  "Ghana": "Gana", "Haiti": "Haiti", "Iran": "Irã", "Iraq": "Iraque",
+  "Ivory Coast": "Costa do Marfim", "Japan": "Japão", "Jordan": "Jordânia",
+  "Mexico": "México", "Morocco": "Marrocos", "Netherlands": "Países Baixos",
+  "New Zealand": "Nova Zelândia", "Norway": "Noruega", "Panama": "Panamá",
+  "Paraguay": "Paraguai", "Portugal": "Portugal", "Qatar": "Catar",
   "Saudi Arabia": "Arábia Saudita", "Scotland": "Escócia", "Senegal": "Senegal",
   "South Africa": "África do Sul", "South Korea": "Coreia do Sul", "Spain": "Espanha",
-  "Sweden": "Suécia", "Switzerland": "Suíça", "Tunisia": "Tunísia", "Turkey": "Turquia",
-  "United States": "Estados Unidos", "Uruguay": "Uruguai", "Uzbekistan": "Uzbequistão",
+  "Sweden": "Suécia", "Switzerland": "Suíça", "Tunisia": "Tunísia",
+  "Türkiye": "Turquia", "Turkey": "Turquia", "United States": "Estados Unidos",
+  "Uruguay": "Uruguai", "Uzbekistan": "Uzbequistão",
 };
 
 // Mapa fase|utc -> nosso id (mata-mata) / knockout map
@@ -91,20 +102,53 @@ const GROUP_MAP: Record<string, number> = {
   "2026-06-27T21:00:00Z|Panamá|Inglaterra": 71, "2026-06-27T21:00:00Z|Croácia|Gana": 72,
 };
 
+// Derivados do KO_MAP: utc -> id (mata-mata não tem time real do nosso lado,
+// só "slot", então casamos pelo horário) e quais ids têm "quem avança".
+const KO_BY_UTC: Record<string, number> = {};
+const KO_ADVANCE_IDS = new Set<number>();
+for (const key of Object.keys(KO_MAP)) {
+  const [phase, utc] = key.split("|");
+  KO_BY_UTC[utc] = KO_MAP[key];
+  if (phase === "r32" || phase === "r16" || phase === "qf" || phase === "sf") {
+    KO_ADVANCE_IDS.add(KO_MAP[key]);
+  }
+}
+
+/**
+ * Normalizes a date string to a canonical UTC ISO key (no millis).
+ * Normaliza uma data para uma chave ISO UTC canônica (sem milissegundos).
+ *
+ * @param s - Date string / String de data.
+ * @returns Canonical UTC ISO / ISO UTC canônico.
+ */
 function normUtc(s: string): string {
   return new Date(s).toISOString().replace(".000Z", "Z");
 }
 
-function resolveId(m: any): number | undefined {
-  const ph = STAGE[m.stage];
-  const utc = normUtc(m.utcDate);
-  if (ph === "group") {
-    const h = EN_TO_PT[m.homeTeam?.name], a = EN_TO_PT[m.awayTeam?.name];
-    return GROUP_MAP[`${utc}|${h}|${a}`];
+/**
+ * Matches an ESPN game to our id: group stage by (utc|teams), knockout by (utc).
+ * Casa o jogo da ESPN com o nosso id: grupos por (utc|times), mata-mata por (utc).
+ *
+ * @param utc - Canonical UTC key / Chave UTC canônica.
+ * @param homePT - Home team (PT) / Mandante (PT).
+ * @param awayPT - Away team (PT) / Visitante (PT).
+ * @returns Our match id, or undefined when unmatched / Nosso id, ou undefined.
+ */
+function resolveId(utc: string, homePT?: string, awayPT?: string): number | undefined {
+  if (homePT && awayPT) {
+    const g = GROUP_MAP[`${utc}|${homePT}|${awayPT}`];
+    if (g) return g;
   }
-  return KO_MAP[`${ph}|${utc}`];
+  return KO_BY_UTC[utc];
 }
 
+/**
+ * Upserts rows into a Supabase table via PostgREST (merge duplicates).
+ * Insere/atualiza linhas numa tabela do Supabase via PostgREST (merge).
+ *
+ * @param path - Table + query after /rest/v1/ / Tabela + query.
+ * @param body - Row(s) to upsert / Linha(s) a gravar.
+ */
 async function sbUpsert(path: string, body: unknown) {
   const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
     method: "POST",
@@ -117,55 +161,84 @@ async function sbUpsert(path: string, body: unknown) {
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
 }
 
+/**
+ * Fetches ESPN events in date chunks and de-duplicates by event id.
+ * Busca os eventos da ESPN em blocos de datas e remove duplicados por id.
+ *
+ * @returns Unique ESPN events / Eventos únicos da ESPN.
+ */
+async function fetchEvents(): Promise<any[]> {
+  const byId = new Map<string, any>();
+  for (const range of RANGES) {
+    try {
+      const r = await fetch(`${ESPN}?dates=${range}`);
+      if (!r.ok) continue;
+      const d = await r.json();
+      for (const e of d.events ?? []) byId.set(e.id, e);
+    } catch (_) { /* ignora bloco que falhar */ }
+  }
+  return [...byId.values()];
+}
+
+/**
+ * Cron entry point: fetches finished games, maps them to our ids, upserts the
+ * results (and the champion at the end), and returns a small JSON summary.
+ * Entrada do cron: busca jogos encerrados, casa com nossos ids, grava os
+ * resultados (e a campeã no fim) e devolve um pequeno resumo em JSON.
+ */
 Deno.serve(async () => {
-  const r = await fetch("https://api.football-data.org/v4/competitions/WC/matches", {
-    headers: { "X-Auth-Token": FD_TOKEN },
-  });
-  if (!r.ok) return new Response(`football-data ${r.status}`, { status: 502 });
-  const data = await r.json();
+  const events = await fetchEvents();
 
   const rows: any[] = [];
-  let finalChampion: string | null = null;
-  for (const m of data.matches ?? []) {
-    if (m.status !== "FINISHED") continue;
-    const id = resolveId(m);
-    if (!id) continue;
-    const ph = STAGE[m.stage];
+  let champion: string | null = null;
+
+  for (const e of events) {
+    if (!e?.status?.type?.completed) continue;          // só jogos encerrados
+    const cs = e.competitions?.[0]?.competitors ?? [];
+    const home = cs.find((c: any) => c.homeAway === "home");
+    const away = cs.find((c: any) => c.homeAway === "away");
+    if (!home || !away) continue;
+
+    const utc = normUtc(e.date);
+    const homePT = ESPN_TO_PT[home.team?.displayName];
+    const awayPT = ESPN_TO_PT[away.team?.displayName];
+    const id = resolveId(utc, homePT, awayPT);
+    if (!id) continue;                                   // não casou: deixa sem resultado
+
     let advances: string | null = null;
-    if (KO_ADVANCE.has(ph) && m.score?.winner) {
-      advances = m.score.winner === "HOME_TEAM" ? "home"
-        : m.score.winner === "AWAY_TEAM" ? "away" : null;
+    if (KO_ADVANCE_IDS.has(id)) {
+      // "advance" cobre pênaltis; cai pra "winner" se faltar.
+      const adv = cs.find((c: any) => c.advance === true) ??
+        cs.find((c: any) => c.winner === true);
+      if (adv) advances = adv.homeAway === "home" ? "home" : "away";
     }
+
     rows.push({
       match_id: id,
-      home: m.score?.fullTime?.home ?? 0,
-      away: m.score?.fullTime?.away ?? 0,
+      home: parseInt(home.score, 10) || 0,
+      away: parseInt(away.score, 10) || 0,
       advances,
       updated_at: new Date().toISOString(),
     });
-    if (ph === "final" && m.score?.winner) {
-      finalChampion = m.score.winner === "HOME_TEAM"
-        ? EN_TO_PT[m.homeTeam?.name] : EN_TO_PT[m.awayTeam?.name];
+
+    if (id === 104) {                                    // final -> campeã
+      const w = cs.find((c: any) => c.winner === true) ??
+        cs.find((c: any) => c.advance === true);
+      if (w) champion = ESPN_TO_PT[w.team?.displayName] ?? null;
     }
   }
 
   if (rows.length) await sbUpsert("results?on_conflict=match_id", rows);
 
-  if (finalChampion) {
-    let topScorer: string | null = null;
-    try {
-      const sc = await fetch("https://api.football-data.org/v4/competitions/WC/scorers?limit=1", {
-        headers: { "X-Auth-Token": FD_TOKEN },
-      });
-      const sd = await sc.json();
-      topScorer = sd.scorers?.[0]?.player?.name ?? null;
-    } catch (_) { /* ignore */ }
+  // Só a campeã é automática; o artilheiro fica pra preencher à mão (não
+  // sobrescreve o top_scorer já salvo).
+  if (champion) {
     await sbUpsert("tournament_result?on_conflict=id", {
-      id: 1, champion: finalChampion, top_scorer: topScorer, updated_at: new Date().toISOString(),
+      id: 1, champion, updated_at: new Date().toISOString(),
     });
   }
 
-  return new Response(JSON.stringify({ updated: rows.length, champion: finalChampion }), {
+  return new Response(JSON.stringify({ updated: rows.length, champion }), {
     headers: { "Content-Type": "application/json" },
   });
 });

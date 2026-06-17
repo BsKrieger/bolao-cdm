@@ -44,12 +44,20 @@ backend gerenciado (Supabase) e uma função serverless agendada.
   peso da fase (grupos 1× → final 3×).
 - **Palpites bônus**: seleção campeã (20 pts) e artilheiro (15 pts), com lista de
   todos os ~1.249 convocados agrupados por país.
+- **Atalho "jogos de hoje"** no topo, espelhado com a lista cronológica (mesmo
+  palpite, sem contar em dobro).
 - **Trava automática** quando a bola rola: contador regressivo por jogo e
   fechamento ao vivo, sem depender de recarregar a página.
+- **Palpites da galera**: depois que cada jogo começa, mostra o palpite de todos,
+  com a divisão dos palpites e destaque de quem cravou.
+- **Escalações + estatísticas ao vivo** (mapa do campo, cartões, lances e as 28
+  estatísticas da partida), buscadas direto da ESPN no navegador e atualizadas
+  durante o jogo. Jogos em andamento recebem um selo **"Ao vivo"**.
 - **Ranking compartilhado** com critério de desempate (placares exatos →
-  resultados certos).
+  resultados certos), setas de variação de posição e gráfico de evolução por
+  participante.
 - **Busca automática de resultados** via função serverless agendada.
-- **Tema claro/escuro** e layout **responsivo** (mobile-first).
+- Identidade visual **"Neon Noir"** (tema escuro) e layout **responsivo** (mobile-first).
 - Funciona **offline / com duplo-clique** (dados em arquivos `.js`, sem build).
 
 ## Stack
@@ -60,7 +68,8 @@ backend gerenciado (Supabase) e uma função serverless agendada.
 | Persistência local | `localStorage` |
 | Backend | Supabase (PostgreSQL + PostgREST), consumido via `fetch` |
 | Automação | Supabase Edge Function (Deno) + cron |
-| Dados esportivos | football-data.org |
+| Resultados, escalações e estatísticas | API pública da ESPN (sem chave) |
+| Convocados (lista do artilheiro) | football-data.org |
 | Hospedagem | Netlify |
 
 ## Arquitetura
@@ -75,9 +84,10 @@ no dashboard, no ranking e nos testes.
 > código módulo a módulo — está em [`DOCUMENTACAO.md`](DOCUMENTACAO.md).**
 
 ```
-index · jogos · ranking · participante · regras   (páginas)
+index · jogos · galera · ranking · participante · regras   (páginas)
         └─ UI por página ─ scoring.js (regras) ─ storage.js ─ db.js ─ Supabase
-                         └─ data/*.js (jogos, seleções, convocados, resultados)
+                         ├─ data/*.js (jogos, seleções, convocados, resultados)
+                         └─ lineup.js ─ API pública da ESPN (escalações/stats/ao vivo)
 ```
 
 ## Como rodar localmente
@@ -96,15 +106,15 @@ no navegador).
 ## Estrutura do repositório
 
 ```
-├── index.html, jogos.html, ranking.html, participante.html, regras.html
+├── index.html, jogos.html, galera.html, ranking.html, participante.html, regras.html
 ├── assets/
 │   ├── css/      estilos (global + um por página)
-│   ├── js/       lógica (scoring, storage, db, app, jogos, ranking...)
+│   ├── js/       lógica (scoring, storage, db, app, jogos, galera, ranking, lineup...)
 │   └── img/      logo
 ├── data/         matches.js, teams.js, scorers.js, results.js
 ├── supabase/     Edge Function de busca automática de resultados
 ├── docs/         guia de configuração do backend
-├── tests/        testes do motor de pontuação
+├── tests/        testes do motor de pontuação + simulação da fase de grupos
 └── DOCUMENTACAO.md   documentação técnica completa
 ```
 
@@ -117,6 +127,11 @@ no navegador).
 - **`localStorage` + Supabase** — resposta instantânea local e ranking
   compartilhado, com sincronização em segundo plano que não trava a interface.
 - **Motor de pontuação como funções puras** — testável e reutilizável.
+- **Escalações e estatísticas direto da ESPN no cliente** — a API manda CORS
+  liberado, então o campo e as stats ao vivo funcionam sem backend novo nem
+  gravar nada no banco.
+- **Código documentado em JSDoc bilíngue (PT-BR/EN)** — docstrings em todas as
+  funções e cabeçalho assinado em cada arquivo.
 
 ## Autor
 

@@ -26,3 +26,6 @@ venv/
 # Supabase local (caso use a CLI) / supabase local CLI
 supabase/.branches/
 supabase/.temp/
+
+# Nota pessoal — não publicar / personal note, keep local
+MENOS-IA.md

@@ -1,20 +1,29 @@
-/* =========================================================================
-   Jogos da Copa do Mundo 2026 / 2026 World Cup matches
-   ---------------------------------------------------------------------------
-   - kickoff: horário de início JÁ EM BRASÍLIA (UTC-3), formato ISO com
-     offset "-03:00". Ex.: "2026-06-13T19:00:00-03:00" = 13/jun 19h em SP.
-     new Date(kickoff) interpreta o offset corretamente (trava/countdown).
-   - Horários validados contra ESPN Brasil e CNN Brasil. Mata-mata pela
-     tabela da ESPN (em Brasília). Alguns jogos de grupos podem variar ±1h
-     entre fontes — confirme os que importam antes de liberar pros amigos.
-   - Mata-mata (id 73-104): times são "slots" (ex: "1º A", "Ven. J73").
-     Quando os confrontos forem definidos, troque pelo nome real da seleção.
-   - phase: chave em PHASES. multiplier null = você ainda vai definir.
-   ========================================================================= */
+/**
+ * @file 2026 World Cup matches / Jogos da Copa do Mundo 2026.
+ *
+ * EN:
+ *  - kickoff: start time ALREADY IN BRASÍLIA (UTC-3), ISO with "-03:00" offset.
+ *    new Date(kickoff) reads the offset correctly (lock/countdown).
+ *  - Times validated against ESPN Brasil and CNN Brasil; group games may vary
+ *    ±1h between sources — confirm the ones that matter before sharing.
+ *  - Knockout (id 73-104): teams are "slots" (e.g. "1º A", "Ven. J73"); replace
+ *    with the real team once the bracket is defined.
+ *  - phase: a key in PHASES. multiplier null = still to be defined.
+ * PT-BR:
+ *  - kickoff: horário de início JÁ EM BRASÍLIA (UTC-3), ISO com offset "-03:00".
+ *    new Date(kickoff) interpreta o offset corretamente (trava/countdown).
+ *  - Horários validados contra ESPN Brasil e CNN Brasil; jogos de grupos podem
+ *    variar ±1h entre fontes — confirme os que importam antes de liberar.
+ *  - Mata-mata (id 73-104): times são "slots" (ex.: "1º A", "Ven. J73"); troque
+ *    pelo nome real quando os confrontos forem definidos.
+ *  - phase: chave em PHASES. multiplier null = você ainda vai definir.
+ *
+ * @author Bruno Krieger
+ */
 
 const PHASES = {
   group: { name: "Fase de grupos",      multiplier: 1    },
-  r32:   { name: "32 avos de final",    multiplier: 1.25 },
+  r32:   { name: "16 avos de final",    multiplier: 1.25 },
   r16:   { name: "Oitavas de final",    multiplier: 1.5  },
   qf:    { name: "Quartas de final",    multiplier: 2    },
   sf:    { name: "Semifinais",          multiplier: 2.5  },
@@ -119,7 +128,7 @@ const MATCHES = [
   { id: 71, phase: "group", group: "L", home: "Panamá",               away: "Inglaterra",           kickoff: "2026-06-27T18:00:00-03:00", venue: "MetLife Stadium, East Rutherford" },
   { id: 72, phase: "group", group: "L", home: "Croácia",              away: "Gana",                 kickoff: "2026-06-27T18:00:00-03:00", venue: "Lincoln Financial Field, Philadelphia" },
 
-  // ===== 32 avos de final (Round of 32) — times definidos após a fase de grupos =====
+  // ===== 16 avos de final (Round of 32) — times definidos após a fase de grupos =====
   { id: 73, phase: "r32", group: null, home: "2º A",  away: "2º B",              kickoff: "2026-06-28T16:00:00-03:00", venue: "SoFi Stadium, Inglewood" },
   { id: 74, phase: "r32", group: null, home: "1º E",  away: "3º A/B/C/D/F",      kickoff: "2026-06-29T17:30:00-03:00", venue: "Gillette Stadium, Foxborough" },
   { id: 75, phase: "r32", group: null, home: "1º F",  away: "2º C",              kickoff: "2026-06-29T22:00:00-03:00", venue: "Estadio BBVA, Guadalupe" },

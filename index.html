@@ -10,8 +10,12 @@
     Estática por enquanto: não depende de dados nem de JS.
     Os links de navegação apontam para páginas que serão criadas na Etapa 2.
   -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/anim.js"></script>
 </head>
 <body>
   <!-- Barra de navegação / Top navigation -->
@@ -25,6 +29,7 @@
       <a class="topnav__link" href="jogos.html">Jogos</a>
       <a class="topnav__link" href="ranking.html">Ranking</a>
       <a class="topnav__link" href="participante.html">Meus palpites</a>
+      <a class="topnav__link" href="galera.html">Palpites da Galera</a>
       <a class="topnav__link" href="regras.html">Regras</a>
     </nav>
   </header>
@@ -43,74 +48,74 @@
 
         <div class="stats" role="list">
           <div class="stat" role="listitem">
-            <span class="stat__value">23</span>
+            <span class="stat__value" data-count="25">25</span>
             <span class="stat__label">participantes</span>
           </div>
           <div class="stat" role="listitem">
-            <span class="stat__value">R$ 1.150</span>
+            <span class="stat__value" data-count="1250" data-prefix="R$ " data-format="thousands">R$ 1.250</span>
             <span class="stat__label">no pote</span>
           </div>
           <div class="stat" role="listitem">
-            <span class="stat__value">104</span>
+            <span class="stat__value" data-count="104">104</span>
             <span class="stat__label">jogos</span>
           </div>
           <div class="stat" role="listitem">
-            <span class="stat__value">48</span>
+            <span class="stat__value" data-count="48">48</span>
             <span class="stat__label">seleções</span>
           </div>
         </div>
 
         <div class="hero__actions">
-          <a class="btn btn--primary" href="jogos.html">Fazer meus palpites</a>
+          <a class="btn btn--primary" href="jogos.html">Fazer meus palpites <i class="ti ti-arrow-narrow-right" aria-hidden="true"></i></a>
           <a class="btn btn--ghost" href="regras.html">Como funciona</a>
         </div>
       </div>
     </section>
 
     <!-- Premiação / Prizes -->
-    <section class="section">
+    <section class="section reveal-on-scroll">
       <h2 class="section__title">Premiação</h2>
-      <p class="section__hint">Entrada de R$ 50 por pessoa · pote total de R$ 1.150</p>
+      <p class="section__hint">Entrada de R$ 50 por pessoa · pote total de R$ 1.250</p>
       <div class="prizes">
         <article class="prize prize--gold">
-          <span class="prize__medal" aria-hidden="true">🥇</span>
+          <i class="prize__medal ti ti-trophy" aria-hidden="true"></i>
           <span class="prize__place">1º lugar</span>
           <span class="prize__value">R$ 700</span>
         </article>
         <article class="prize prize--silver">
-          <span class="prize__medal" aria-hidden="true">🥈</span>
+          <i class="prize__medal ti ti-medal" aria-hidden="true"></i>
           <span class="prize__place">2º lugar</span>
-          <span class="prize__value">R$ 300</span>
+          <span class="prize__value">R$ 350</span>
         </article>
         <article class="prize prize--bronze">
-          <span class="prize__medal" aria-hidden="true">🥉</span>
+          <i class="prize__medal ti ti-medal" aria-hidden="true"></i>
           <span class="prize__place">3º lugar</span>
-          <span class="prize__value">R$ 150</span>
+          <span class="prize__value">R$ 200</span>
         </article>
       </div>
     </section>
 
     <!-- Atalhos / Section shortcuts -->
-    <section class="section">
+    <section class="section reveal-on-scroll">
       <h2 class="section__title">Por onde começar</h2>
       <div class="cards">
         <a class="card" href="jogos.html">
-          <span class="card__icon" aria-hidden="true">📅</span>
+          <i class="card__icon ti ti-ball-football" aria-hidden="true"></i>
           <h3 class="card__title">Jogos &amp; palpites</h3>
           <p class="card__text">Os 104 jogos por fase. Palpite trava quando a bola rola.</p>
         </a>
         <a class="card" href="ranking.html">
-          <span class="card__icon" aria-hidden="true">🏆</span>
+          <i class="card__icon ti ti-trophy" aria-hidden="true"></i>
           <h3 class="card__title">Ranking</h3>
           <p class="card__text">Classificação em tempo real, com critério de desempate.</p>
         </a>
         <a class="card" href="participante.html">
-          <span class="card__icon" aria-hidden="true">👤</span>
+          <i class="card__icon ti ti-user" aria-hidden="true"></i>
           <h3 class="card__title">Meus palpites</h3>
           <p class="card__text">Sua tela: palpites, pontos por jogo e progresso.</p>
         </a>
         <a class="card" href="regras.html">
-          <span class="card__icon" aria-hidden="true">📖</span>
+          <i class="card__icon ti ti-book" aria-hidden="true"></i>
           <h3 class="card__title">Regras</h3>
           <p class="card__text">Como pontua cada acerto e os multiplicadores por fase.</p>
         </a>
@@ -118,27 +123,28 @@
     </section>
 
     <!-- Resumo da pontuação / Scoring summary -->
-    <section class="section">
+    <section class="section reveal-on-scroll">
       <h2 class="section__title">Como pontua (resumo)</h2>
       <div class="scoring">
+
         <ul class="scoring__list">
-          <li><span class="scoring__pts">10</span> placar exato</li>
-          <li><span class="scoring__pts">5</span> vencedor ou empate correto</li>
-          <li><span class="scoring__pts">+3</span> saldo de gols (vencedor + diferença)</li>
-          <li><span class="scoring__pts">+2</span> classificado no mata-mata</li>
+          <li><span class="scoring__pts">10</span> Placar Exato</li>
+          <li><span class="scoring__pts">5</span> Vencedor ou Empate Correto</li>
+          <li><span class="scoring__pts">+3</span> Saldo de Gols (Vencedor + Diferença)</li>
+          <li><span class="scoring__pts">+2</span> Classificado no Mata-Mata</li>
         </ul>
+        <br>
         <p class="scoring__multipliers">
-          Multiplicador por fase: grupos <strong>1x</strong> · oitavas
-          <strong>1,5x</strong> · quartas <strong>2x</strong> · semis
-          <strong>2,5x</strong> · final <strong>3x</strong>
+          Multiplicador por fase: Grupos <strong>[1x]</strong> &nbsp;&nbsp;·&nbsp;&nbsp;16 avos <strong>[1.25x]</strong> &nbsp;&nbsp;·&nbsp;&nbsp;Oitavas <strong>[1.5x]</strong> &nbsp;&nbsp;·&nbsp;&nbsp;Quartas <strong>[2x]</strong> &nbsp;&nbsp;·&nbsp;&nbsp;Semis <strong>[2.5x]</strong> &nbsp;&nbsp;·&nbsp;&nbsp; Final <strong>[3x]</strong>
         </p>
-        <p class="section__hint">Bônus: seleção campeã e artilheiro da Copa.</p>
+        <br>
+        <p class="section__hint">Bônus: Seleção Campeã <strong>20pts</strong>&nbsp;&nbsp;·&nbsp;&nbsp;Artilheiro da Copa <strong>15pts</strong></p>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <p>⚽ Bolão CDM · Copa 2026 ⚽</p>
+    <p><i class="ti ti-ball-football" aria-hidden="true"></i> Bolão CDM · Copa 2026 <i class="ti ti-ball-football" aria-hidden="true"></i></p>
   </footer>
 </body>
 </html>

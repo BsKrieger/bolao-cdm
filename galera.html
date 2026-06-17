@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranking · Bolão CDM</title>
+  <title>Palpites da galera · Bolão CDM</title>
   <link rel="icon" type="image/png" href="assets/img/logo-cdm.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="stylesheet" href="assets/css/ranking.css" />
+  <link rel="stylesheet" href="assets/css/galera.css" />
+  <link rel="stylesheet" href="assets/css/lineup.css" />
   <script src="assets/js/anim.js"></script>
 </head>
 <body>
@@ -22,9 +23,9 @@
     <nav class="topnav" aria-label="Navegação principal">
       <a class="topnav__link" href="index.html">Início</a>
       <a class="topnav__link" href="jogos.html">Jogos</a>
-      <a class="topnav__link is-active" href="ranking.html">Ranking</a>
+      <a class="topnav__link" href="ranking.html">Ranking</a>
       <a class="topnav__link" href="participante.html">Meus palpites</a>
-      <a class="topnav__link" href="galera.html">Palpites da Galera</a>
+      <a class="topnav__link is-active" href="galera.html">Palpites da Galera</a>
       <a class="topnav__link" href="regras.html">Regras</a>
     </nav>
     <button id="profileChip" class="profile-chip" type="button" title="Trocar de participante"></button>
@@ -32,13 +33,17 @@
 
   <main class="page">
     <div class="page__head">
-      <h1 class="page__title">Ranking</h1>
-      <p class="page__sub">Classificação geral do bolão. Recarregue para atualizar.</p>
+      <h1 class="page__title">Palpites da galera</h1>
+      <p class="page__sub">
+        O palpite de cada jogo aparece <strong>assim que ele começar</strong> e o
+        placar trava. Antes disso, ninguém vê o palpite de ninguém.
+      </p>
     </div>
-    <div id="rankingRoot"></div>
+    <div id="galeraRoot"></div>
   </main>
 
-  <!-- Dados + lógica -->
+  <!-- Dados primeiro, depois a lógica -->
+  <script src="data/teams.js"></script>
   <script src="data/matches.js"></script>
   <script src="data/results.js"></script>
   <script src="assets/js/config.js"></script>
@@ -46,7 +51,8 @@
   <script src="assets/js/scoring.js"></script>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/app.js"></script>
-  <script src="assets/js/ranking.js"></script>
+  <script src="assets/js/galera.js"></script>
+  <script src="assets/js/lineup.js"></script>
   <footer class="footer">
     <p><i class="ti ti-ball-football" aria-hidden="true"></i> Bolão CDM · Copa 2026 <i class="ti ti-ball-football" aria-hidden="true"></i></p>
   </footer>

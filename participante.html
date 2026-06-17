@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meus palpites · Bolão CDM</title>
   <link rel="icon" type="image/png" href="assets/img/logo-cdm.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="stylesheet" href="assets/css/participante.css" />
-  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/anim.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +24,7 @@
       <a class="topnav__link" href="jogos.html">Jogos</a>
       <a class="topnav__link" href="ranking.html">Ranking</a>
       <a class="topnav__link is-active" href="participante.html">Meus palpites</a>
+      <a class="topnav__link" href="galera.html">Palpites da Galera</a>
       <a class="topnav__link" href="regras.html">Regras</a>
     </nav>
     <button id="profileChip" class="profile-chip" type="button" title="Editar seu nome"></button>
@@ -30,8 +35,8 @@
       <h1 class="page__title">Meus palpites</h1>
       <p class="page__sub">Seu desempenho no bolão — pontos, acertos e detalhe por jogo.</p>
     </div>
-
     <section id="dashStats"></section>
+    <br>
     <section id="dashBonus"></section>
     <section id="dashScored"></section>
   </main>
@@ -47,7 +52,7 @@
   <script src="assets/js/app.js"></script>
   <script src="assets/js/participante.js"></script>
   <footer class="footer">
-    <p>⚽ Bolão CDM · Copa 2026 ⚽</p>
+    <p><i class="ti ti-ball-football" aria-hidden="true"></i> Bolão CDM · Copa 2026 <i class="ti ti-ball-football" aria-hidden="true"></i></p>
   </footer>
 </body>
 </html>

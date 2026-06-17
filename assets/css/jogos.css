@@ -1,49 +1,73 @@
-/* =========================================================================
-   Tela de Jogos & Palpites / Matches & predictions screen
-   Complementa styles.css (mesma identidade visual).
-   ========================================================================= */
+/**
+ * @file Matches & predictions screen / Tela de Jogos & Palpites.
+ *
+ * EN: Complements styles.css (same Neon Noir identity).
+ * PT-BR: Complementa styles.css (mesma identidade Neon Noir).
+ *
+ * @author Bruno Krieger
+ */
 
-/* .page / .page__* agora vivem em styles.css (compartilhado) */
-
-/* --- Filtro de fases (fixo no topo ao rolar) --- */
+/* --- Filtro de fases (tabs angulares, fixas no topo) --- */
 .filterbar {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   position: sticky;
-  top: 0;
+  top: 64px; /* abaixo da navbar sticky / below the sticky navbar */
   z-index: 10;
   padding: 12px 0;
-  margin-bottom: 12px;
-  background: linear-gradient(var(--color-bg) 75%, transparent);
+  margin-bottom: 14px;
+  background: linear-gradient(var(--color-bg) 78%, transparent);
 }
 
 .filterbar button {
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 7px 14px;
-  font: inherit;
-  font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+  padding: 8px 15px;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .filterbar button:hover {
   color: var(--color-text);
+  border-color: var(--color-border-accent);
 }
 
 .filterbar button.is-active {
   background: var(--color-primary);
-  color: #04201a;
-  border-color: transparent;
-  font-weight: 600;
+  color: var(--color-on-accent);
+  border-color: var(--color-primary);
 }
 
 /* --- Seção de fase --- */
 .phase {
-  margin-bottom: 28px;
+  margin-bottom: 34px;
+}
+
+/* Atalho "Jogos de hoje" fixo no topo / pinned today shortcut */
+.phase--today {
+  background: var(--color-accent-glow);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius);
+  padding: 6px 14px 14px;
+}
+
+.phase--today .phase__head {
+  border-bottom-color: var(--color-border-accent);
+}
+
+.phase--today .phase__head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-accent);
 }
 
 .phase__head {
@@ -51,51 +75,125 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .phase__head h2 {
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .phase__mult {
   color: var(--color-accent);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
-.group-title {
-  font-size: 1rem;
+/* Cabeçalho de dia (lista cronológica) / day header (chronological list) */
+.day-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
-  margin: 18px 0 8px;
+  margin: 24px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.day-title::first-letter {
+  text-transform: uppercase;
 }
 
 /* --- Card de jogo --- */
 .match {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  border-radius: var(--radius);
+  padding: 16px 18px;
   margin-bottom: 10px;
+  animation: fadeUp 0.45s ease both;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.match.is-locked {
-  opacity: 0.7;
+.match:hover {
+  border-color: var(--color-border-accent);
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Jogo fechado: destaque vermelho bem visível / closed match: clear red cue */
+.match.is-locked,
+.match.is-locked:hover {
+  opacity: 0.9;
+  border-color: rgba(255, 90, 77, 0.5);
+  box-shadow: 0 0 18px var(--color-danger-glow);
+}
+
+/* Jogo AO VIVO: vence o "fechado" — borda inferior em destaque + brilho verde.
+   Precisa vir depois de .is-locked (o card está travado E ao vivo). / live cue. */
+.match.is-live,
+.match.is-live:hover {
+  opacity: 1;
+  border-color: var(--color-border-accent);
+  border-bottom: 2px solid var(--color-accent);
+  box-shadow: 0 0 18px var(--color-accent-glow);
 }
 
 .match__info {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--color-text-muted);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.match__when {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.match__group {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .match__venue {
   text-align: right;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Resultado oficial do jogo (encerrado), abaixo do palpite / official result */
+.match__result {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--color-border);
+  text-align: center;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.match__result strong {
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
 }
 
 .match__row {
@@ -140,18 +238,19 @@
 }
 
 .score {
-  width: 46px;
-  height: 44px;
+  width: 48px;
+  height: 46px;
   text-align: center;
   background: var(--color-bg-soft);
   color: var(--color-text);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font: inherit;
-  font-size: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
   font-weight: 700;
   -moz-appearance: textfield;
   appearance: textfield;
+  transition: border-color 0.15s ease;
 }
 
 .score::-webkit-outer-spin-button,
@@ -171,7 +270,8 @@
 }
 
 .score__x {
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 
@@ -179,26 +279,34 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 12px;
   min-height: 18px;
 }
 
 .status {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--color-text-muted);
 }
 
 .status--locked {
-  color: #ff8c8c;
+  color: var(--color-danger);
   font-weight: 600;
 }
 
 .status--open {
   color: var(--color-primary);
+  font-family: var(--font-mono);
+}
+
+/* Selo "ao vivo" centralizado no topo do card / centered live badge at the top */
+.match__live {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
 .saved {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--color-text-muted);
 }
 
@@ -212,13 +320,15 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
   border-top: 1px dashed var(--color-border);
 }
 
 .advance__label {
   font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--color-text-muted);
 }
 
@@ -229,11 +339,14 @@
 }
 
 .advance__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: var(--color-bg-soft);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  padding: 7px 13px;
   font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
@@ -241,14 +354,14 @@
 }
 
 .advance__btn:hover:not(:disabled) {
-  border-color: var(--color-primary);
+  border-color: var(--color-border-accent);
 }
 
 .advance__btn.is-on {
   background: var(--color-primary);
-  color: #04201a;
-  border-color: transparent;
-  font-weight: 600;
+  color: var(--color-on-accent);
+  border-color: var(--color-primary);
+  font-weight: 700;
 }
 
 .advance__btn:disabled {
@@ -260,15 +373,24 @@
 .bonus {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
   border-radius: var(--radius);
-  padding: 18px 18px 20px;
-  margin-bottom: 16px;
+  padding: 20px 20px 22px;
+  margin-bottom: 18px;
+}
+
+/* Bônus travado após o início da Copa: mesmo destaque vermelho dos jogos fechados */
+.bonus--locked {
+  border-color: rgba(255, 90, 77, 0.5);
+  border-left-color: rgba(255, 90, 77, 0.5);
+  box-shadow: 0 0 18px var(--color-danger-glow);
+  opacity: 0.9;
 }
 
 .bonus__note {
   color: var(--color-text-muted);
   font-size: 0.88rem;
-  margin: 4px 0 14px;
+  margin: 4px 0 16px;
 }
 
 .bonus__grid {
@@ -284,12 +406,14 @@
 }
 
 .bonus__label {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--color-text-muted);
 }
 
 .bonus__input {
-  padding: 11px 12px;
+  padding: 12px 13px;
   background: var(--color-bg-soft);
   color: var(--color-text);
   border: 1px solid var(--color-border);
@@ -308,17 +432,16 @@
   cursor: not-allowed;
 }
 
-/* --- Select nativo (artilheiro: lista longa de 1.249 jogadores) / native select --- */
+/* --- Select nativo (artilheiro: lista longa) / native select --- */
 .bonus__select {
   width: 100%;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   padding-right: 36px;
-  color: var(--color-text-muted); /* azulado, igual à seleção campeã */
+  color: var(--color-text-muted);
   cursor: pointer;
-  /* seta neutra que funciona nos dois temas / chevron readable on both themes */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23a7acce' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23c4ff4d' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
 }
@@ -334,7 +457,7 @@
   align-items: center;
   gap: 8px;
   text-align: left;
-  padding: 11px 36px 11px 12px; /* espaço à direita p/ a seta */
+  padding: 12px 36px 12px 13px;
   background: var(--color-bg-soft);
   color: var(--color-text);
   border: 1px solid var(--color-border);
@@ -342,8 +465,7 @@
   font: inherit;
   font-size: 0.98rem;
   cursor: pointer;
-  /* mesma seta do artilheiro / same chevron as the top-scorer select */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23a7acce' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23c4ff4d' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
 }
@@ -377,10 +499,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 9px 10px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--color-text);
   font: inherit;
   font-size: 0.95rem;
@@ -392,10 +514,14 @@
   background: var(--color-surface-2);
 }
 
+@media (max-width: 640px) {
+  .filterbar { top: 56px; }
+}
+
 @media (max-width: 560px) {
   .team__name { font-size: 0.9rem; }
   .team__flag { font-size: 1.2rem; }
-  .score { width: 40px; height: 40px; font-size: 1.05rem; }
-  .match__info { font-size: 0.72rem; }
+  .score { width: 42px; height: 42px; font-size: 1.1rem; }
+  .match__info { font-size: 0.7rem; }
   .bonus__grid { grid-template-columns: 1fr; }
 }
