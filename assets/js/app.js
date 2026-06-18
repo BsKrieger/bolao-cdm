@@ -216,12 +216,13 @@ const App = (() => {
   function modalMarkup() {
     const codeField = backendOn ? `
         <input id="profileCodeInput" class="modal__input" type="text" maxlength="20"
-               placeholder="Código pessoal (ex: 1234)" autocomplete="off" style="margin-top:10px;" />` : "";
+               placeholder="Seu código pessoal" autocomplete="off" style="margin-top:10px;" />` : "";
     const help = backendOn
-      ? "Escolha seu nome e um código pessoal. Com eles você acessa e edita seus palpites de qualquer aparelho."
+      ? "Entre com o nome e o código que você já cadastrou. Errou? Confira com a organização — não criamos contas novas por aqui."
       : "Escolha o nome que vai aparecer no ranking. Fica salvo neste aparelho.";
+    const btnLabel = backendOn ? "Entrar" : "Começar";
     return `
-      <div class="modal" role="dialog" aria-modal="true" aria-label="Cadastro de participante">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Acesso do participante">
         <img class="modal__logo" src="assets/img/logo-cdm.png" alt="" />
         <h2 class="modal__title">Bem-vindo ao Bolão CDM</h2>
         <p class="modal__text">${help}</p>
@@ -229,7 +230,7 @@ const App = (() => {
                placeholder="Seu nome" autocomplete="off" />
         ${codeField}
         <p class="modal__error" id="profileError"></p>
-        <button class="btn btn--primary modal__save" id="profileSave">Começar</button>
+        <button class="btn btn--primary modal__save" id="profileSave">${btnLabel}</button>
       </div>`;
   }
 
@@ -258,11 +259,11 @@ const App = (() => {
 
       if (backendOn) {
         const code = (codeInput.value || "").trim();
-        if (code.length < 3) { error.textContent = "Crie um código pessoal de pelo menos 3 caracteres."; return; }
+        if (!code) { error.textContent = "Digite seu código pessoal."; return; }
         saveBtn.disabled = true;
         error.textContent = "Entrando…";
         try {
-          const res = await DB.loginOrRegister(name, code);
+          const res = await DB.login(name, code);
           if (!res.ok) { error.textContent = res.error; saveBtn.disabled = false; return; }
           const profile = { id: res.participant.id, name: res.participant.name, code };
           Storage.saveProfile(profile);
