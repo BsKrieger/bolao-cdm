@@ -1,0 +1,205 @@
+/**
+ * @file Groups & bracket / Grupos e Chaveamento — complements styles.css (Neon Noir).
+ *
+ * EN: Group tables in a responsive grid + the knockout bracket as side-by-side
+ *     columns (horizontal scroll on mobile to keep the bracket shape).
+ * PT-BR: Tabelas dos grupos numa grade responsiva + o chaveamento em colunas lado
+ *        a lado (rolagem horizontal no mobile para manter o formato de chave).
+ *
+ * @author Bruno Krieger
+ */
+
+.gc-section { margin-bottom: 40px; }
+
+.gc-note {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  margin: 0 0 14px;
+}
+
+/* --- Grupos / groups --- */
+.grp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.grp {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.grp__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-accent);
+  margin: 0 0 8px;
+}
+
+.grp__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.grp__table th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 4px 3px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.grp__table th.grp__teamh { text-align: left; }
+
+.grp__table td {
+  text-align: center;
+  padding: 6px 3px;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.grp__row:last-child td { border-bottom: none; }
+
+/* Zona de classificação (1º e 2º) / qualification zone */
+.grp__row--qual td:first-child { box-shadow: inset 3px 0 0 var(--color-accent); }
+.grp__row--qual { background: rgba(196, 255, 77, 0.06); }
+
+.grp__pos { color: var(--color-text-muted); width: 22px; }
+.grp__pts { font-family: var(--font-mono); font-weight: 700; color: var(--color-text); }
+
+.grp__team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left !important;
+}
+
+.grp__team .flag { width: 22px; height: 15px; flex: 0 0 auto; }
+
+.grp__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.gc-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 2px 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.gc-legend__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: rgba(196, 255, 77, 0.06);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+  flex: 0 0 auto;
+}
+
+/* --- Chaveamento / bracket --- */
+/* Rola na horizontal no mobile p/ manter o formato de chave / horizontal scroll. */
+.br-wrap {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.br {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  min-width: min-content;
+}
+
+.br__col {
+  flex: 1 0 168px;
+  min-width: 168px;
+  display: flex;
+  flex-direction: column;
+  /* Distribui os confrontos verticalmente, sugerindo a árvore da chave. */
+  justify-content: space-around;
+  gap: 12px;
+}
+
+.br__round {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.br__match {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.br__side {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  font-size: 0.84rem;
+}
+
+.br__side + .br__side { border-top: 1px solid var(--color-border); }
+
+.br__side .flag { width: 20px; height: 14px; flex: 0 0 auto; }
+
+.br__teamname {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.br__teamname--tbd { color: var(--color-text-muted); font-style: italic; }
+
+.br__side--win { background: rgba(196, 255, 77, 0.10); }
+.br__side--win .br__teamname { color: var(--color-accent); font-weight: 700; }
+
+.br__score {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.br__empty {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Disputa de 3º lugar — card avulso e centralizado / third-place, standalone */
+.br__third {
+  margin-top: 20px;
+  max-width: 240px;
+}
+
+@media (max-width: 640px) {
+  .grp-grid { grid-template-columns: 1fr; }
+}
