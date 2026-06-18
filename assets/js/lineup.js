@@ -25,26 +25,8 @@ const Lineup = (function () {
   /** ESPN match summary endpoint / endpoint do resumo de jogo da ESPN. */
   const SUM = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=";
 
-  // ESPN team name → português (same map as the Edge Function).
-  // Nome do time na ESPN → português (igual ao da Edge Function).
-  const ESPN_TO_PT = {
-    "Algeria": "Argélia", "Argentina": "Argentina", "Australia": "Austrália",
-    "Austria": "Áustria", "Belgium": "Bélgica", "Bosnia-Herzegovina": "Bósnia e Herzegovina",
-    "Brazil": "Brasil", "Canada": "Canadá", "Cape Verde": "Cabo Verde",
-    "Cape Verde Islands": "Cabo Verde", "Colombia": "Colômbia", "Congo DR": "RD Congo",
-    "Croatia": "Croácia", "Curaçao": "Curaçao", "Czechia": "Tchéquia", "Ecuador": "Equador",
-    "Egypt": "Egito", "England": "Inglaterra", "France": "França", "Germany": "Alemanha",
-    "Ghana": "Gana", "Haiti": "Haiti", "Iran": "Irã", "Iraq": "Iraque",
-    "Ivory Coast": "Costa do Marfim", "Japan": "Japão", "Jordan": "Jordânia",
-    "Mexico": "México", "Morocco": "Marrocos", "Netherlands": "Países Baixos",
-    "New Zealand": "Nova Zelândia", "Norway": "Noruega", "Panama": "Panamá",
-    "Paraguay": "Paraguai", "Portugal": "Portugal", "Qatar": "Catar",
-    "Saudi Arabia": "Arábia Saudita", "Scotland": "Escócia", "Senegal": "Senegal",
-    "South Africa": "África do Sul", "South Korea": "Coreia do Sul", "Spain": "Espanha",
-    "Sweden": "Suécia", "Switzerland": "Suíça", "Tunisia": "Tunísia",
-    "Türkiye": "Turquia", "Turkey": "Turquia", "United States": "Estados Unidos",
-    "Uruguay": "Uruguai", "Uzbekistan": "Uzbequistão",
-  };
+  // O mapa ESPN→PT agora é global, definido em data/espn-teams.js (compartilhado
+  // com a página de Grupos/Chaveamento). / ESPN→PT map is now a shared global.
 
   const eventIdCache = {};  // matchId -> eventId | null
   const lineupCache = {};   // matchId -> parsed | null
