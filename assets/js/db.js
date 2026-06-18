@@ -74,27 +74,25 @@ const DB = (() => {
   }
 
   /**
-   * Logs in (name + code) or registers on first access.
-   * Faz login (nome + código) ou cadastra no primeiro acesso.
+   * Logs in an EXISTING participant (name + code). Registration is disabled: all
+   * participants are already enrolled, so a wrong name OR a wrong code just
+   * returns an error instead of creating a new user. The message is generic on
+   * purpose — it doesn't reveal whether the name exists (avoids user enumeration).
+   * Faz login de um participante JÁ EXISTENTE (nome + código). O cadastro está
+   * desativado: todos já estão inscritos, então nome OU código errado apenas
+   * retorna erro, sem criar usuário novo. A mensagem é genérica de propósito —
+   * não revela se o nome existe (evita enumeração de usuários).
    *
    * @param {string} name - Participant name / Nome do participante.
    * @param {string} code - Personal code / Código pessoal.
    * @returns {Promise<{ok:boolean, participant?:Object, error?:string}>}
    */
-  async function loginOrRegister(name, code) {
+  async function login(name, code) {
     const existing = await findParticipant(name);
-    if (existing) {
-      if (existing.code !== code) {
-        return { ok: false, error: "Esse nome já está em uso e o código não confere." };
-      }
-      return { ok: true, participant: existing };
+    if (!existing || existing.code !== code) {
+      return { ok: false, error: "Nome ou código incorretos. Confira com a organização do bolão." };
     }
-    const created = await rest("participants", {
-      method: "POST",
-      headers: headers({ Prefer: "return=representation" }),
-      body: JSON.stringify({ name, code }),
-    });
-    return { ok: true, participant: created[0] };
+    return { ok: true, participant: existing };
   }
 
   // ---- Predictions / palpites ----
@@ -265,7 +263,7 @@ const DB = (() => {
   }
 
   return {
-    ready, loginOrRegister, findParticipant,
+    ready, login, findParticipant,
     pullPredictions, pushPrediction,
     pullBonus, pushBonus,
     fetchResults, fetchTournamentResult,
