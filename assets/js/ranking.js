@@ -219,7 +219,11 @@
       deltaById[p.id] = N >= 1 ? (snapshots[N - 1][p.id] - snapshots[N][p.id]) : null;
     });
 
-    return { rows: currentRows, historyById, deltaById, games, total: data.participants.length, nameById };
+    return {
+      rows: currentRows, historyById, deltaById, games,
+      total: data.participants.length, nameById,
+      predByP: idx.predByP, results, // p/ a lista de palpites por jogo / for the per-game picks list
+    };
   }
 
   // ---- Evolution chart (inline SVG, no deps) / gráfico de evolução ----
@@ -289,11 +293,47 @@
     const start = series[0], now = series[series.length - 1];
     const best = Math.min.apply(null, series), worst = Math.max.apply(null, series);
     return `<tr class="rank__chartrow" data-for="${esc(String(id))}"><td colspan="5">
-      <div class="rank__chart">
-        <h3 class="rank__chart-title">Evolução de ${name}</h3>
-        ${buildChartSVG(series, model.total, model.games)}
-        <p class="rank__chart-cap">Começou em <strong>${start}º</strong> · agora <strong>${now}º</strong> · melhor <strong>${best}º</strong> · pior <strong>${worst}º</strong></p>
+      <div class="rank__expand">
+        <div class="rank__chart">
+          <h3 class="rank__chart-title">Evolução de ${name}</h3>
+          ${buildChartSVG(series, model.total, model.games)}
+          <p class="rank__chart-cap">Começou em <strong>${start}º</strong> · agora <strong>${now}º</strong> · melhor <strong>${best}º</strong> · pior <strong>${worst}º</strong></p>
+        </div>
+        ${lastPicksPanel(id, model)}
       </div></td></tr>`;
+  }
+
+  // Painel ao lado do gráfico: palpites do jogador nos jogos JÁ finalizados,
+  // do mais recente para o mais antigo, com o placar real, o palpite e os pontos.
+  // / side panel: the player's picks on finished games, newest first.
+  function lastPicksPanel(id, model) {
+    const preds = (model.predByP && model.predByP[id]) || {};
+    const res = model.results || {};
+    const games = model.games.slice().reverse(); // mais recente primeiro / newest first
+    if (!games.length) return "";
+    const items = games.map((m) => {
+      const r = res[m.id];
+      const pred = preds[m.id] || null;
+      const sc = Scoring.scoreMatch(m, pred, r);
+      const mine = (pred && pred.home != null) ? `${pred.home} × ${pred.away}` : "—";
+      const cls = sc.total > 0 ? (Scoring.isMax(m, sc) ? " rank__pick--max" : " rank__pick--pos") : " rank__pick--zero";
+      return `<div class="rank__pick${cls}">
+        <span class="rank__pick-game">${flagOf(m.home)}<b>${r.home} × ${r.away}</b>${flagOf(m.away)}</span>
+        <span class="rank__pick-mine">${esc(mine)}</span>
+        <span class="rank__pick-pts">${fmtPts(sc.total)} pts</span>
+      </div>`;
+    }).join("");
+    return `<div class="rank__lastpicks">
+      <h3 class="rank__chart-title">Palpites nos jogos finalizados</h3>
+      <div class="rank__picks-list">
+        <div class="rank__pick rank__pick--head">
+          <span class="rank__pick-game">Placar</span>
+          <span class="rank__pick-mine">Palpite</span>
+          <span class="rank__pick-pts"></span>
+        </div>
+        ${items}
+      </div>
+    </div>`;
   }
 
   // ---- Render ----
