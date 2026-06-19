@@ -215,6 +215,127 @@
 
 .rchart__dot { fill: var(--color-primary); }
 
+/* --- Área expandida: gráfico + palpites lado a lado / expanded area --- */
+.rank__expand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 24px;
+  align-items: flex-start;
+}
+
+.rank__chart { flex: 1 1 360px; min-width: 0; }
+.rank__lastpicks { flex: 1 1 280px; min-width: 0; }
+
+.rank__picks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+  /* Barra de scroll minimalista e verde / minimalist green scrollbar (Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 255, 77, 0.35) transparent;
+  padding-right: 2px; /* respiro p/ a barra não colar nos pontos / breathing room */
+}
+
+/* Barra de scroll no WebKit (Chrome/Edge/Safari) / WebKit scrollbar */
+.rank__picks-list::-webkit-scrollbar { width: 6px; }
+.rank__picks-list::-webkit-scrollbar-track { background: transparent; }
+.rank__picks-list::-webkit-scrollbar-thumb {
+  background: rgba(196, 255, 77, 0.30);
+  border-radius: 999px;
+}
+.rank__picks-list::-webkit-scrollbar-thumb:hover { background: rgba(196, 255, 77, 0.55); }
+
+/* Linhas no estilo dos palpites da galera, em grid p/ alinhar com o cabeçalho.
+   / galera-style pick rows, on a grid so they line up with the header. */
+.rank__pick {
+  display: grid;
+  grid-template-columns: 1fr 64px 56px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-left: 3px solid transparent; /* reserva espaço p/ a barra do --max */
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+}
+
+.rank__pick-game {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.rank__pick-game .flag { width: 20px; height: 14px; flex: 0 0 auto; }
+.rank__pick-game b {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.rank__pick-mine {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.rank__pick-pts {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+/* Cabeçalho fixo no topo da lista (alinha com as linhas e fica visível ao rolar).
+   / sticky header: aligns with the rows and stays visible while scrolling. */
+.rank__pick--head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-bg-soft);
+  border-left-color: transparent;
+  border-radius: 0;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 6px;
+}
+.rank__pick--head .rank__pick-game,
+.rank__pick--head .rank__pick-mine,
+.rank__pick--head .rank__pick-pts {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+/* Estados iguais aos da galera / same states as galera:
+   - positiva: highlight verde suave + número verde;
+   - máxima: highlight mais forte + barra lateral verde + número verde;
+   - zerou: avermelhado. */
+.rank__pick--pos { background: rgba(196, 255, 77, 0.035); }
+.rank__pick--pos .rank__pick-game { color: var(--color-text); }
+.rank__pick--pos .rank__pick-pts { color: var(--color-primary); }
+
+.rank__pick--max {
+  background: rgba(196, 255, 77, 0.18);
+  border-left-color: var(--color-primary);
+}
+.rank__pick--max .rank__pick-game { color: var(--color-text); font-weight: 700; }
+.rank__pick--max .rank__pick-pts { color: var(--color-primary); }
+
+.rank__pick--zero { background: rgba(255, 90, 77, 0.10); }
+.rank__pick--zero .rank__pick-game { color: var(--color-danger); }
+.rank__pick--zero .rank__pick-pts { color: var(--color-danger); }
+
 .rank-loading {
   color: var(--color-text-muted);
   padding: 20px 2px;
