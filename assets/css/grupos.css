@@ -114,27 +114,110 @@
 }
 
 /* --- Chaveamento / bracket --- */
-/* Rola na horizontal no mobile p/ manter o formato de chave / horizontal scroll. */
+/* No desktop a chave inteira CABE (sem rolagem) — pode "vazar" um pouco a
+   largura da página, centralizada na viewport. No mobile, rola na horizontal
+   com a barrinha verde do projeto. / fits on desktop, green-scroll on mobile. */
 .br-wrap {
+  width: 94vw;
+  max-width: 1280px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
   overflow-x: auto;
   padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 255, 77, 0.35) transparent;
 }
 
-.br {
+.br-wrap::-webkit-scrollbar { height: 6px; }
+.br-wrap::-webkit-scrollbar-track { background: transparent; }
+.br-wrap::-webkit-scrollbar-thumb { background: rgba(196, 255, 77, 0.30); border-radius: 999px; }
+.br-wrap::-webkit-scrollbar-thumb:hover { background: rgba(196, 255, 77, 0.55); }
+
+/* Chave em DOIS lados convergindo ao centro (16avos → final + troféu).
+   / two-sided bracket converging to the center (R32 → final + trophy). */
+.br2 {
   display: flex;
+  align-items: stretch;       /* todas as colunas com a mesma altura */
   gap: 16px;
-  align-items: flex-start;
-  min-width: min-content;
+  width: 100%;                /* preenche a largura (cabe sem rolagem no desktop) */
+  position: relative;         /* base p/ o SVG das linhas / base for the lines SVG */
 }
 
-.br__col {
-  flex: 1 0 168px;
-  min-width: 168px;
+.br2__side { display: flex; gap: 16px; flex: 1; position: relative; z-index: 1; }
+
+.br2__col {
+  flex: 1 1 0;                /* colunas dividem a largura → cabe tudo / share width */
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  /* Distribui os confrontos verticalmente, sugerindo a árvore da chave. */
+}
+
+/* Corpo da coluna: espalha os confrontos na vertical p/ alinhar com a coluna
+   seguinte (menos jogos = centralizados entre os pares que os alimentam). */
+.br2__col-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   justify-content: space-around;
+  gap: 8px;
+}
+
+/* Centro: final no topo + troféu / center: final on top + trophy */
+.br2__center {
+  flex: 0 0 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
+  padding: 0 4px;
+  position: relative;
+  z-index: 1;
+}
+
+/* SVG das linhas verdes que ligam os jogos (desenhado por JS após o layout).
+   / green connector lines SVG, drawn by JS after layout. */
+.br2__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;            /* atrás dos cards / behind the cards */
+  pointer-events: none;
+}
+
+.br2__line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  opacity: 0.5;
+}
+
+.br2__center .br__match { width: 100%; }
+.br2__final-label { color: var(--color-accent); font-size: 0.95rem; }
+
+.br2__trophy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-gold);
+}
+
+.br2__trophy .ti {
+  font-size: 3.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 14px rgba(255, 207, 77, 0.45));
+}
+
+.br2__trophy span {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
 }
 
 .br__round {
@@ -153,6 +236,8 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  position: relative;
+  z-index: 1;            /* card acima das linhas / card above the lines */
 }
 
 .br__side {
@@ -187,17 +272,21 @@
   color: var(--color-text);
 }
 
-.br__empty {
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
+/* Disputa de 3º lugar — card avulso e centralizado / third-place, standalone */
+.br2__third {
+  margin: 22px auto 0;
+  max-width: 240px;
   text-align: center;
-  padding: 10px 0;
 }
 
-/* Disputa de 3º lugar — card avulso e centralizado / third-place, standalone */
-.br__third {
-  margin-top: 20px;
-  max-width: 240px;
+/* Em telas estreitas a chave não cabe: volta a ter largura mínima por coluna e
+   rola na horizontal (dentro do .br-wrap, com a barrinha verde).
+   / narrow screens: fixed column widths force the horizontal scroll. */
+@media (max-width: 920px) {
+  .br2 { width: auto; min-width: min-content; }
+  .br2__side { flex: 0 0 auto; }
+  .br2__col { flex: 0 0 128px; }
+  .br2__center { flex: 0 0 140px; }
 }
 
 @media (max-width: 640px) {
