@@ -1,0 +1,267 @@
+/**
+ * @file World Cup statistics / Estatísticas da Copa — complements styles.css (Neon Noir).
+ *
+ * EN: Stat cards, leader boards, biggest-wins list and the per-team ranking
+ *     table (with the green Noir scrollbar on mobile).
+ * PT-BR: Cards de números, quadros de líderes, lista de goleadas e a tabela de
+ *        ranking por seleção (com a barrinha verde do projeto no mobile).
+ *
+ * @author Bruno Krieger
+ */
+
+.gc-section { margin-bottom: 40px; }
+.gc-note { color: var(--color-text-muted); font-size: 0.88rem; margin: 0 0 14px; }
+
+/* --- Números da Copa / headline numbers --- */
+.estat-nums {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)); /* tudo numa linha no desktop */
+  gap: 12px;
+}
+
+@media (max-width: 900px) { .estat-nums { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 520px) { .estat-nums { grid-template-columns: repeat(2, 1fr); } }
+
+.estat-num {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.estat-num__v {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.estat-num__l {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.estat-num__sub {
+  font-size: 0.72rem;
+  color: var(--color-text);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Líderes / leader boards --- */
+/* 2 por linha → artilharia/assistências em cima, cartões embaixo (2x2). */
+.estat-boards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 620px) { .estat-boards { grid-template-columns: 1fr; } }
+
+.estat-board {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.estat-board__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-accent);
+}
+
+.estat-board__title .ti { font-size: 1.05rem; }
+
+.estat-list { list-style: none; margin: 0; padding: 0; }
+
+.estat-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 6px;
+  border-left: 3px solid transparent; /* reserva p/ a barra do 1º lugar */
+  border-bottom: 1px solid var(--color-border);
+}
+
+.estat-row:last-child { border-bottom: none; }
+
+/* Destaque do ranking: 1º = verde forte (como pontuação máxima); 2º = verde suave.
+   / ranking highlight: 1st = strong green (like max score); 2nd = soft green. */
+.estat-row.estat-1 {
+  background: rgba(196, 255, 77, 0.16);
+  border-left-color: var(--color-accent);
+}
+.estat-row.estat-1 .estat-row__name { color: var(--color-accent); font-weight: 700; }
+.estat-row.estat-2 { background: rgba(196, 255, 77, 0.05); }
+
+.estat-row__pos {
+  flex: 0 0 20px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.estat-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.estat-row__team { flex: 0 0 auto; display: inline-flex; }
+.estat-row__team .flag { width: 22px; height: 15px; }
+
+.estat-row__val {
+  flex: 0 0 auto;
+  min-width: 30px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Pílulas de cartões no estilo Noir: fundo translúcido + texto/borda na cor
+   (mesma lógica dos highlights verdes, mas em amarelo e vermelho). */
+.estat-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 5px 6px;     /* mais alto que largo → formato de cartão / card-shaped */
+  border-radius: 3px;   /* cantos retos, não arredondado / not round */
+  border: 1px solid transparent;
+}
+
+.estat-pill--yellow {
+  background: rgba(255, 210, 63, 0.14);
+  color: #ffd23f;
+  border-color: rgba(255, 210, 63, 0.38);
+}
+
+.estat-pill--red {
+  background: rgba(255, 90, 77, 0.14);
+  color: var(--color-danger);
+  border-color: rgba(255, 90, 77, 0.40);
+}
+
+/* --- Maiores goleadas / biggest wins --- */
+.estat-gols {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.estat-gol {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+}
+
+.estat-gol__t {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.estat-gol__t--away { justify-content: flex-end; }
+.estat-gol__t .flag { width: 22px; height: 15px; flex: 0 0 auto; }
+
+.estat-gol__s {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+/* --- Ranking por seleção / per-team ranking --- */
+.estat-trk-wrap {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 255, 77, 0.35) transparent;
+}
+
+.estat-trk-wrap::-webkit-scrollbar { height: 6px; }
+.estat-trk-wrap::-webkit-scrollbar-track { background: transparent; }
+.estat-trk-wrap::-webkit-scrollbar-thumb { background: rgba(196, 255, 77, 0.30); border-radius: 999px; }
+.estat-trk-wrap::-webkit-scrollbar-thumb:hover { background: rgba(196, 255, 77, 0.55); }
+
+.estat-trk {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-width: 460px;
+}
+
+.estat-trk th, .estat-trk td {
+  padding: 9px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  font-variant-numeric: tabular-nums;
+}
+
+.estat-trk thead th {
+  background: var(--color-surface-2);
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+.estat-trk tbody tr:last-child td { border-bottom: none; }
+
+.estat-trk__pos { width: 36px; color: var(--color-text-muted); font-family: var(--font-mono); }
+
+/* Alinhados à esquerda — com td/th no seletor p/ vencer o "text-align: center"
+   geral das células (que tem mais especificidade). / left-aligned, beats the
+   table-wide center. */
+.estat-trk th.estat-trk__teamh { text-align: left; }
+/* A célula continua sendo table-cell (sem flex) p/ a borda inferior ficar reta e
+   alinhada com as outras colunas. / keep it a table-cell so the row divider is straight. */
+.estat-trk td.estat-trk__team { text-align: left; white-space: nowrap; }
+.estat-trk__team .flag { width: 22px; height: 15px; vertical-align: middle; margin-right: 8px; }
+.estat-trk__team span { vertical-align: middle; }
+
+/* Destaque do 1º/2º no ranking por seleção (mesmo verde: forte e suave). */
+.estat-trk tbody tr.estat-1 { background: rgba(196, 255, 77, 0.16); }
+.estat-trk tbody tr.estat-1 .estat-trk__pos { box-shadow: inset 3px 0 0 var(--color-accent); }
+.estat-trk tbody tr.estat-1 .estat-trk__team span { color: var(--color-accent); font-weight: 700; }
+.estat-trk tbody tr.estat-2 { background: rgba(196, 255, 77, 0.05); }
