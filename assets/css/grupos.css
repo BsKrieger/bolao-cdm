@@ -286,7 +286,30 @@
   .br2 { width: auto; min-width: min-content; }
   .br2__side { flex: 0 0 auto; }
   .br2__col { flex: 0 0 128px; }
-  .br2__center { flex: 0 0 140px; }
+
+  /* No mobile a chave rola na horizontal e mostra só a fatia central por vez —
+     por isso a final precisa ficar ALINHADA com as duas semis (e não "um pouco
+     pra cima" como na web, onde a chave inteira é vista de uma vez). Centramos
+     só o card da final no espaço abaixo do rótulo (mesmo eixo das semis) e o
+     troféu vai logo abaixo (absoluto), sem empurrar o card. A WEB não muda: tudo
+     aqui é mobile-only. / on mobile the bracket scrolls one slice at a time, so
+     the final must line up with the semis; trophy drops below it. */
+  .br2__center {
+    flex: 0 0 140px;
+    justify-content: flex-start; /* rótulo "Final" no topo, como as outras colunas */
+  }
+  .br2__center .br__match {
+    margin-top: auto;
+    margin-bottom: auto;          /* centraliza só o card → alinha com as semis */
+  }
+  .br2__center .br2__trophy {
+    position: absolute;
+    top: 60%;                     /* logo abaixo do card da final / just below it */
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 640px) {
