@@ -345,5 +345,7 @@
   .rank th, .rank td { padding: 11px 7px; }
   .rank__delta { width: 44px; }
   .rank__sub { width: 46px; }
-  .rank__namechev { display: none; }
+  /* Mantém o chevron no mobile: é a pista de que o nome é tocável (abre o
+     gráfico + palpites). / keep the chevron on mobile as the tap affordance. */
+  .rank__namechev { font-size: 0.85rem; }
 }
