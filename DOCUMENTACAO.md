@@ -151,11 +151,14 @@ consomem. Exemplo de `jogos.html`:
 | `jogos.html` | Página | 104 jogos + campos de palpite + bônus |
 | `participante.html` | Página | Dashboard individual ("Meus palpites") |
 | `ranking.html` | Página | Classificação geral |
+| `grupos.html` | Página | Classificação real dos 12 grupos + chaveamento do mata-mata (ESPN) |
+| `estatisticas.html` | Página | Estatísticas da Copa: artilharia, assistências, cartões, público, ranking por seleção (ESPN) |
 | `regras.html` | Página | Tabelas de pontuação, multiplicadores e premiação |
 | `data/matches.js` | Dados | `PHASES` (fases + multiplicadores) e `MATCHES` (104 jogos) |
 | `data/teams.js` | Dados | `TEAMS`: nome PT-BR → código ISO da bandeira |
 | `data/scorers.js` | Dados | `SCORERS`: 1.249 jogadores por país (lista do artilheiro) |
 | `data/results.js` | Dados | `RESULTS` e `TOURNAMENT_RESULT` (fallback local) |
+| `data/espn-teams.js` | Dados | `ESPN_TO_PT`: nome da seleção na ESPN → nome PT-BR (usado por grupos/estatísticas) |
 | `assets/js/config.js` | Config | URL + chave pública do Supabase |
 | `assets/js/db.js` | Backend | Adaptador Supabase (PostgREST via `fetch`) |
 | `assets/js/storage.js` | Persistência | `localStorage` + disparo de sync para o backend |
@@ -167,7 +170,9 @@ consomem. Exemplo de `jogos.html`:
 | `assets/js/lineup.js` | UI | Escalações + estatísticas + selo "ao vivo" (API ESPN) |
 | `assets/js/galera.js` | UI | Palpites de todos por jogo |
 | `assets/js/participante.js` | UI | Monta o dashboard individual |
-| `assets/js/ranking.js` | UI | Monta o ranking |
+| `assets/js/ranking.js` | UI | Monta o ranking + expansão (gráfico de evolução e palpites por jogo) |
+| `assets/js/grupos.js` | UI | Classificação dos grupos + chaveamento de dois lados (API ESPN) |
+| `assets/js/estatisticas.js` | UI | Estatísticas da Copa (líderes, goleadas, público, ranking por seleção — API ESPN) |
 | `assets/css/*.css` | Estilo | `styles` (global) + um por página |
 | `supabase/functions/sync-results/index.ts` | Automação | Edge Function que busca resultados |
 | `tests/scoring.test.*` | Testes | Casos do motor de pontuação |
@@ -251,23 +256,23 @@ const TOURNAMENT_RESULT = { champion: "Brasil", topScorer: "Kylian Mbappé" };
 
 ## 6. Fluxos principais (fluxogramas)
 
-### 6.1. Primeiro acesso e login
+### 6.1. Acesso (login)
 
 Todo acesso passa por `App.requireProfile()`. Sem perfil, abre o modal de
-cadastro; com perfil, sincroniza do backend e segue.
+**login**; com perfil, sincroniza do backend e segue. O **cadastro está
+desativado** — as contas dos participantes são criadas pela organização; quem
+erra nome/código vê um erro genérico (não cria conta nova).
 
 ```mermaid
 flowchart TD
     A["Página carrega → App.requireProfile()"] --> B{"Já tem perfil<br/>no localStorage?"}
-    B -- Não --> C["Abre modal de cadastro"]
+    B -- Não --> C["Abre modal de login"]
     C --> D["Digita nome + código pessoal"]
-    D --> E["DB.loginOrRegister(nome, código)"]
-    E --> F{"Nome já existe<br/>no banco?"}
-    F -- "Sim + código bate" --> G["Login OK"]
-    F -- "Sim + código errado" --> H["Erro: nome em uso"] --> D
-    F -- "Não existe" --> I["Cria participante novo"]
+    D --> E["DB.login(nome, código)"]
+    E --> F{"Nome existe e<br/>código bate?"}
+    F -- "Sim" --> G["Login OK"]
+    F -- "Não" --> H["Erro genérico<br/>(não cria conta)"] --> D
     G --> J["Salva perfil local + sincroniza"]
-    I --> J
     B -- Sim --> K["syncOnLoad: puxa palpites do banco"]
     J --> L["onReady(profile) → monta a página"]
     K --> L
@@ -451,8 +456,9 @@ await rest("predictions?on_conflict=participant_id,match_id", {
 > Assim não preciso saber se o palpite já existe: o banco resolve — insere se for
 > novo, atualiza se já houver (pela chave de conflito).
 
-**`loginOrRegister(name, code)`** implementa o login leve: busca por nome; se
-existe, confere o código; se não, cria.
+**`login(name, code)`** implementa o login leve: busca por nome e confere o
+código. O **cadastro foi desativado** — se o nome não existe ou o código não
+bate, retorna um erro genérico (não cria participante por aqui).
 
 ### 7.4. `countdown.js` — contador + trava ao vivo
 
@@ -522,6 +528,34 @@ termina, busca o artilheiro e grava `champion` + `top_scorer`.
 > **Chave da integração:** o nome do artilheiro vem do football-data.org. Por
 > isso a lista do artilheiro (`scorers.js`) é gerada **da mesma fonte** — assim a
 > grafia do palpite casa exatamente com a do resultado na hora de pontuar.
+
+### 7.7. `grupos.js` e `estatisticas.js` — espelho da Copa real (ESPN)
+
+Duas páginas que mostram o **torneio de verdade** (não o bolão), lidas **direto
+da API pública da ESPN no navegador** — sem backend novo e **sem gravar nada**
+(somente leitura). Como a ESPN responde com CORS liberado, o `fetch` roda no
+cliente. Os nomes das seleções vêm em inglês e são traduzidos pelo mapa
+compartilhado `ESPN_TO_PT` (`data/espn-teams.js`).
+
+- **`grupos.js`** — duas seções:
+  - *Grupos*: lê o endpoint de `standings` (rank/pontos já calculados pela ESPN)
+    e monta as 12 tabelas, destacando a zona de classificação (1º e 2º).
+  - *Chaveamento*: a **estrutura** da chave vem da NOSSA base (`matches.js`, que
+    encoda a árvore via placeholders "Ven. J##"); os **times e placares reais**
+    vêm do `scoreboard` do mata-mata, casados por horário de início. A chave é
+    desenhada em **dois lados convergindo para a final** (com o troféu no centro)
+    e as **linhas verdes** que ligam cada jogo aos dois que o alimentam são
+    `<polyline>` SVG desenhadas por JS após o layout (`createElementNS`, medindo
+    as posições reais — por isso se adaptam a redimensionamento).
+- **`estatisticas.js`** — agrega vários endpoints da ESPN com um limitador de
+  concorrência (`pool`) e cache em memória: líderes (artilharia, assistências,
+  cartões), estatísticas por seleção (resolvendo `athlete`/`team` por `$ref`),
+  e números do torneio derivados do `scoreboard` (gols, média, público total/
+  médio/recorde, maiores goleadas).
+
+> **Por que client-side e read-only?** Esses dados são públicos e só de exibição;
+> não entram na pontuação do bolão. Buscar direto da ESPN evita criar mais uma
+> rota no backend e mantém a página sempre atualizada a cada jogo.
 
 ---
 
