@@ -30,11 +30,23 @@ backend gerenciado (Supabase) e uma função serverless agendada.
 
 ## Demonstração
 
-> _Adicione aqui prints das telas (sugestão: salve em `docs/screenshots/`)._
+| Home | Jogos & palpites |
+| --- | --- |
+| ![Home](docs/screenshots/home.png) | ![Jogos e palpites](docs/screenshots/jogos.png) |
+| **Grupos** (classificação real) | **Chaveamento** (mata-mata) |
+| ![Grupos](docs/screenshots/grupos.png) | ![Chaveamento](docs/screenshots/chaveamento.png) |
+| **Estatísticas da Copa** | **Ranking** |
+| ![Estatísticas](docs/screenshots/estatisticas.png) | ![Ranking](docs/screenshots/ranking.png) |
+| **Meus palpites** | **Regras & premiação** |
+| ![Meus palpites](docs/screenshots/participante.png) | ![Regras](docs/screenshots/regras.png) |
 
-| Home | Jogos & palpites | Ranking |
-| --- | --- | --- |
-| _`docs/screenshots/home.png`_ | _`docs/screenshots/jogos.png`_ | _`docs/screenshots/ranking.png`_ |
+Palpites de todos por jogo — revelados só depois que a bola rola — com a escalação
+e as estatísticas ao vivo no mesmo card:
+
+![Palpites da Galera](docs/screenshots/galera.png)
+
+> _Os nomes no Ranking e nos Palpites da Galera foram **anonimizados** ("Participante N")
+> nas imagens para preservar a privacidade do grupo._
 
 ## Funcionalidades
 
@@ -52,10 +64,18 @@ backend gerenciado (Supabase) e uma função serverless agendada.
   com a divisão dos palpites e destaque de quem cravou.
 - **Escalações + estatísticas ao vivo** (mapa do campo, cartões, lances e as 28
   estatísticas da partida), buscadas direto da ESPN no navegador e atualizadas
-  durante o jogo. Jogos em andamento recebem um selo **"Ao vivo"**.
+  durante o jogo. Jogos em andamento recebem um selo **"Ao vivo"** (também nos
+  cards de Jogos e na aba da Galera).
+- **Grupos & Chaveamento** (página nova): a **classificação real** dos 12 grupos
+  e o **chaveamento do mata-mata** em chave de dois lados convergindo para a
+  final (com o troféu no centro e linhas conectando os confrontos), tudo lido da
+  API pública da ESPN.
+- **Estatísticas da Copa** (página nova): artilharia, assistências, cartões
+  (amarelos/vermelhos), maiores goleadas, público (total, médio e recorde) e um
+  **ranking por seleção** — também da ESPN.
 - **Ranking compartilhado** com critério de desempate (placares exatos →
-  resultados certos), setas de variação de posição e gráfico de evolução por
-  participante.
+  resultados certos) e setas de variação de posição. Clicar num nome **expande**
+  o gráfico de evolução da posição e a lista de palpites nos jogos finalizados.
 - **Busca automática de resultados** via função serverless agendada.
 - Identidade visual **"Neon Noir"** (tema escuro) e layout **responsivo** (mobile-first).
 - Funciona **offline / com duplo-clique** (dados em arquivos `.js`, sem build).
@@ -68,7 +88,7 @@ backend gerenciado (Supabase) e uma função serverless agendada.
 | Persistência local | `localStorage` |
 | Backend | Supabase (PostgreSQL + PostgREST), consumido via `fetch` |
 | Automação | Supabase Edge Function (Deno) + cron |
-| Resultados, escalações e estatísticas | API pública da ESPN (sem chave) |
+| Escalações, stats da partida, classificação dos grupos, chaveamento e estatísticas da Copa | API pública da ESPN (sem chave) |
 | Convocados (lista do artilheiro) | football-data.org |
 | Hospedagem | Netlify |
 
@@ -84,10 +104,11 @@ no dashboard, no ranking e nos testes.
 > código módulo a módulo — está em [`DOCUMENTACAO.md`](DOCUMENTACAO.md).**
 
 ```
-index · jogos · galera · ranking · participante · regras   (páginas)
+index · jogos · galera · ranking · participante · grupos · estatisticas · regras  (páginas)
         └─ UI por página ─ scoring.js (regras) ─ storage.js ─ db.js ─ Supabase
-                         ├─ data/*.js (jogos, seleções, convocados, resultados)
-                         └─ lineup.js ─ API pública da ESPN (escalações/stats/ao vivo)
+                         ├─ data/*.js (jogos, seleções, convocados, resultados, espn-teams)
+                         ├─ lineup.js ─ API pública da ESPN (escalações/stats/ao vivo)
+                         └─ grupos.js · estatisticas.js ─ ESPN (classificação, chave, estatísticas)
 ```
 
 ## Como rodar localmente
@@ -106,14 +127,17 @@ no navegador).
 ## Estrutura do repositório
 
 ```
-├── index.html, jogos.html, galera.html, ranking.html, participante.html, regras.html
+├── index.html, jogos.html, galera.html, ranking.html, participante.html,
+│   grupos.html, estatisticas.html, regras.html
 ├── assets/
-│   ├── css/      estilos (global + um por página)
-│   ├── js/       lógica (scoring, storage, db, app, jogos, galera, ranking, lineup...)
+│   ├── css/      estilos (global + um por página: jogos, galera, ranking, lineup,
+│   │             participante, grupos, estatisticas)
+│   ├── js/       lógica (scoring, storage, db, app, jogos, galera, ranking,
+│   │             lineup, grupos, estatisticas, countdown, anim)
 │   └── img/      logo
-├── data/         matches.js, teams.js, scorers.js, results.js
+├── data/         matches.js, teams.js, scorers.js, results.js, espn-teams.js
 ├── supabase/     Edge Function de busca automática de resultados
-├── docs/         guia de configuração do backend
+├── docs/         guia de configuração do backend + screenshots
 ├── tests/        testes do motor de pontuação + simulação da fase de grupos
 └── DOCUMENTACAO.md   documentação técnica completa
 ```
