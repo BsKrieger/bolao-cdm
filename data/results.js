@@ -5,8 +5,8 @@
  *     live source is the Supabase `results` table). scoring.js compares the
  *     predictions against these results.
  *     Per match: [id]: { home: <home goals>, away: <away goals>, advances: "home"|"away" }
- *      - home/away: final score (normal time + extra time; do NOT count
- *        penalties as goals — penalties only affect "advances").
+ *      - home/away: regulation-time score only (90'); do NOT count extra time
+ *        or penalties as goals — they only affect "advances".
  *      - advances: who qualified. Use ONLY in knockouts (r32→sf); valid even when
  *        decided on penalties. Omit in groups, third place and final.
  *      - Match not played yet: leave the id out.
@@ -14,8 +14,8 @@
  *        estático; a fonte ao vivo é a tabela `results` do Supabase). O
  *        scoring.js compara os palpites com estes resultados.
  *        Por jogo: [id]: { home: <gols casa>, away: <gols fora>, advances: "home"|"away" }
- *         - home/away: placar final (normal + prorrogação; NÃO conte pênaltis
- *           como gol — pênaltis entram só no "advances").
+ *         - home/away: placar SÓ do tempo regulamentar (90'); NÃO conte
+ *           prorrogação nem pênaltis como gol — eles entram só no "advances".
  *         - advances: quem se classificou. Use SÓ no mata-mata (16-avos→semis);
  *           vale mesmo nos pênaltis. Omita em grupos, 3º lugar e final.
  *         - Jogo não realizado: não inclua o id.
@@ -25,7 +25,7 @@
 const RESULTS = {
   // Exemplos (apague quando a Copa começar):
   // 1:  { home: 2, away: 1 },                      // jogo de grupos
-  // 73: { home: 1, away: 1, advances: "home" },    // mata-mata nos pênaltis
+  // 73: { home: 1, away: 1, advances: "home" },    // 1x1 nos 90'; avançou nos pênaltis
 };
 
 /* Resultado do torneio (palpites bônus) / tournament-wide result.

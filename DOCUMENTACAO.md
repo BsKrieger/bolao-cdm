@@ -522,8 +522,18 @@ function resolveId(m): number | undefined {
 }
 ```
 
-Só processa jogos `FINISHED`, faz `upsert` em `results` e, quando a **final**
-termina, busca o artilheiro e grava `champion` + `top_scorer`.
+Só processa jogos encerrados e faz `upsert` em `results`. Quando a **final**
+termina, grava também a `champion` (campeã) em `tournament_result`; o artilheiro
+(`top_scorer`) é preenchido à mão (a função não sobrescreve o que já houver).
+
+**Placar do mata-mata: tempo regulamentar (90').** O palpite de placar vale o
+resultado ao fim dos 90 minutos. Como o `scoreboard` traz o placar final (que
+inclui prorrogação), a função busca o `summary` de cada jogo de mata-mata e soma
+os dois primeiros períodos (1º + 2º tempo), via `regulationFromLinescores`
+(`regulation.ts`). Prorrogação e pênaltis não entram no placar — pênaltis decidem
+apenas o `advances`. Se a ESPN não trouxer os períodos de um jogo, o placar não é
+gravado (fica no log, para preenchimento manual), para nunca salvar um 120' por
+engano.
 
 > **Chave da integração:** o nome do artilheiro vem do football-data.org. Por
 > isso a lista do artilheiro (`scorers.js`) é gerada **da mesma fonte** — assim a
