@@ -19,10 +19,15 @@
  * @author Bruno Krieger
  */
 
+import { regulationFromLinescores } from "./regulation.ts";
+
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
+// O summary traz o placar por período (1º/2º tempo, prorrogação, pênaltis), de
+// onde tiramos o tempo regulamentar no mata-mata. / per-period score endpoint.
+const ESPN_SUMMARY = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary";
 // A ESPN limita ~100 eventos por chamada; busco em blocos de datas. / fetch in chunks.
 const RANGES = ["20260611-20260627", "20260628-20260710", "20260711-20260719"];
 
@@ -114,6 +119,10 @@ for (const key of Object.keys(KO_MAP)) {
   }
 }
 
+// Todos os ids de mata-mata (r32→final). Nesses, o placar que vale é o do tempo
+// regulamentar (90'). / every knockout id; these score regulation time only.
+const KO_IDS = new Set<number>(Object.values(KO_MAP));
+
 /**
  * Normalizes a date string to a canonical UTC ISO key (no millis).
  * Normaliza uma data para uma chave ISO UTC canônica (sem milissegundos).
@@ -181,6 +190,36 @@ async function fetchEvents(): Promise<any[]> {
 }
 
 /**
+ * Fetches one game's summary and returns the regulation-time score (90'),
+ * summing the first two periods of each side. Returns null when ESPN doesn't
+ * expose usable linescores (the caller then skips the row).
+ * Busca o summary de um jogo e devolve o placar do tempo regulamentar (90'),
+ * somando os dois primeiros períodos de cada lado. Devolve null quando a ESPN
+ * não traz linescores utilizáveis (quem chama então pula a linha).
+ *
+ * @param eventId - ESPN event id / id do evento na ESPN.
+ * @returns {home, away} in regulation, or null / no regulamentar, ou null.
+ */
+async function fetchRegulation(
+  eventId: string,
+): Promise<{ home: number; away: number } | null> {
+  try {
+    const r = await fetch(`${ESPN_SUMMARY}?event=${eventId}`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const cs = d?.header?.competitions?.[0]?.competitors ?? [];
+    const home = cs.find((c: any) => c.homeAway === "home");
+    const away = cs.find((c: any) => c.homeAway === "away");
+    const h = regulationFromLinescores(home?.linescores);
+    const a = regulationFromLinescores(away?.linescores);
+    if (h === null || a === null) return null;
+    return { home: h, away: a };
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
  * Cron entry point: fetches finished games, maps them to our ids, upserts the
  * results (and the champion at the end), and returns a small JSON summary.
  * Entrada do cron: busca jogos encerrados, casa com nossos ids, grava os
@@ -189,9 +228,10 @@ async function fetchEvents(): Promise<any[]> {
 Deno.serve(async () => {
   const events = await fetchEvents();
 
-  const rows: any[] = [];
-  let champion: string | null = null;
-
+  // 1) Casa cada jogo encerrado com o nosso id / match each finished game to our id.
+  const finished: Array<
+    { eventId: string; id: number; cs: any[]; home: any; away: any }
+  > = [];
   for (const e of events) {
     if (!e?.status?.type?.completed) continue;          // só jogos encerrados
     const cs = e.competitions?.[0]?.competitors ?? [];
@@ -205,25 +245,60 @@ Deno.serve(async () => {
     const id = resolveId(utc, homePT, awayPT);
     if (!id) continue;                                   // não casou: deixa sem resultado
 
+    finished.push({ eventId: e.id, id, cs, home, away });
+  }
+
+  // 2) No mata-mata, o palpite vale o TEMPO REGULAMENTAR (90'). A ESPN só expõe
+  //    o placar por período no `summary`, então buscamos um por jogo (em
+  //    paralelo). Grupos não têm prorrogação: o placar do scoreboard já é 90'.
+  //    Knockouts score regulation time (90'); fetch per-game summaries.
+  const regulation = new Map<number, { home: number; away: number } | null>();
+  await Promise.all(
+    finished.filter((f) => KO_IDS.has(f.id)).map(async (f) => {
+      regulation.set(f.id, await fetchRegulation(f.eventId));
+    }),
+  );
+
+  // 3) Monta as linhas a gravar / build the rows to upsert.
+  const rows: any[] = [];
+  let champion: string | null = null;
+
+  for (const f of finished) {
+    let home: number, away: number;
+    if (KO_IDS.has(f.id)) {
+      const reg = regulation.get(f.id);
+      if (!reg) {                                        // sem linescores: não grava placar errado
+        console.error(
+          `sync-results: sem placar regulamentar p/ jogo ${f.id} (event ${f.eventId}); pulando`,
+        );
+        continue;
+      }
+      home = reg.home;
+      away = reg.away;
+    } else {
+      home = parseInt(f.home.score, 10) || 0;            // grupos: scoreboard já é 90'
+      away = parseInt(f.away.score, 10) || 0;
+    }
+
     let advances: string | null = null;
-    if (KO_ADVANCE_IDS.has(id)) {
+    if (KO_ADVANCE_IDS.has(f.id)) {
       // "advance" cobre pênaltis; cai pra "winner" se faltar.
-      const adv = cs.find((c: any) => c.advance === true) ??
-        cs.find((c: any) => c.winner === true);
+      const adv = f.cs.find((c: any) => c.advance === true) ??
+        f.cs.find((c: any) => c.winner === true);
       if (adv) advances = adv.homeAway === "home" ? "home" : "away";
     }
 
     rows.push({
-      match_id: id,
-      home: parseInt(home.score, 10) || 0,
-      away: parseInt(away.score, 10) || 0,
+      match_id: f.id,
+      home,
+      away,
       advances,
       updated_at: new Date().toISOString(),
     });
 
-    if (id === 104) {                                    // final -> campeã
-      const w = cs.find((c: any) => c.winner === true) ??
-        cs.find((c: any) => c.advance === true);
+    if (f.id === 104) {                                  // final -> campeã (quem venceu de fato)
+      const w = f.cs.find((c: any) => c.winner === true) ??
+        f.cs.find((c: any) => c.advance === true);
       if (w) champion = ESPN_TO_PT[w.team?.displayName] ?? null;
     }
   }
