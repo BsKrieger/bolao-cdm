@@ -49,11 +49,15 @@
    * @returns {Promise<Object>}
    */
   async function fetchJson(u) {
-    if (_cache[u]) return _cache[u];
-    const r = await fetch(u, { cache: "no-store" });
+    // A ESPN devolve alguns $ref em http://; força https p/ evitar bloqueio de
+    // conteúdo misto quando o site roda em https.
+    // ESPN returns some $ref as http://; force https to avoid mixed-content block.
+    const url = u.replace(/^http:\/\//i, "https://");
+    if (_cache[url]) return _cache[url];
+    const r = await fetch(url, { cache: "no-store" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
-    _cache[u] = d;
+    _cache[url] = d;
     return d;
   }
 
