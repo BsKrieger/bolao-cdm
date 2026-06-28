@@ -461,10 +461,16 @@
    * @returns {string} Picker HTML / HTML do seletor.
    */
   function buildAdvance(m, pred, locked) {
-    const sel = pred.advances || "";
-    const dis = locked ? "disabled" : "";
-    return `<div class="advance">
-      <span class="advance__label">Quem avança?</span>
+    const hasScore = pred.home != null && pred.away != null;
+    const isDraw = hasScore && pred.home === pred.away;
+    const sel = Scoring.effectiveAdvance(pred);   // vencedor do placar, ou a escolha no empate
+    const canChoose = isDraw && !locked;          // só dá pra escolher no empate
+    const dis = canChoose ? "" : "disabled";
+    const hint = !hasScore ? "defina o placar"
+      : isDraw ? "empate: escolha quem avança"
+      : "avança pelo placar";
+    return `<div class="advance${isDraw ? "" : " advance--auto"}">
+      <span class="advance__label">Quem avança? <small class="advance__hint">${hint}</small></span>
       <div class="advance__opts">
         <button type="button" class="advance__btn ${sel === "home" ? "is-on" : ""}" data-adv="home" data-id="${m.id}" ${dis}>${flagOf(m.home)} ${m.home}</button>
         <button type="button" class="advance__btn ${sel === "away" ? "is-on" : ""}" data-adv="away" data-id="${m.id}" ${dis}>${flagOf(m.away)} ${m.away}</button>
@@ -517,11 +523,18 @@
    */
   function syncPrediction(id, ok) {
     const pred = Storage.getPrediction(id) || {};
+    const m = MATCHES.find((x) => x.id === id);
     document.querySelectorAll(`.match[data-id="${id}"]`).forEach((card) => {
       const hi = card.querySelector('[data-side="home"]');
       const ai = card.querySelector('[data-side="away"]');
       if (hi && pred.home != null) hi.value = pred.home;
       if (ai && pred.away != null) ai.value = pred.away;
+      // No mata-mata, o "quem avança" segue o placar: re-renderiza e religa o handler.
+      const adv = card.querySelector(".advance");
+      if (adv && m && ADVANCE_PHASES.has(m.phase)) {
+        adv.outerHTML = buildAdvance(m, pred, isLocked(m));
+        card.querySelectorAll(".advance__btn").forEach((b) => b.addEventListener("click", onAdvanceClick));
+      }
       setSaved(card, ok);
     });
   }

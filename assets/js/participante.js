@@ -155,7 +155,7 @@
   function advanceLine(m, pred, res) {
     if (!Scoring.KO_ADVANCE.has(m.phase) || !res.advances) return "";
     const name = (side) => (side === "home" ? m.home : m.away);
-    const mine = pred && pred.advances;
+    const mine = Scoring.effectiveAdvance(pred);
     let verdict;
     if (!mine) verdict = "(você não palpitou)";
     else if (mine === res.advances) verdict = '<i class="ti ti-circle-check result__ok" aria-hidden="true"></i> você acertou';
