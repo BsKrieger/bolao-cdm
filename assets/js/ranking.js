@@ -390,7 +390,7 @@
         <tbody>${body}</tbody>
       </table>
       <p class="section__hint" style="margin-top:14px;">
-        Setas = variação desde o último jogo computado. Clique no nome para ver a evolução. Recarregue para atualizar.
+        Setas = variação desde o último jogo computado. Clique na linha para ver a evolução. Recarregue para atualizar.
       </p>`;
     attachRowToggle(root, model);
   }
@@ -409,10 +409,11 @@
     const table = root.querySelector(".rank");
     if (!table) return;
     table.addEventListener("click", (e) => {
-      const btn = e.target.closest(".rank__namebtn");
+      const row = e.target.closest("tr.rank__row"); // qualquer lugar da linha do participante
+      if (!row) return;                             // ignora o cabeçalho e a linha do gráfico
+      const btn = row.querySelector(".rank__namebtn");
       if (!btn) return;
       const id = btn.dataset.id;
-      const row = btn.closest("tr");
       const next = row.nextElementSibling;
       const wasOpen = next && next.classList.contains("rank__chartrow") && next.dataset.for === id;
 
