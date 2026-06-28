@@ -34,8 +34,10 @@
    *
    * @returns {void}
    */
-  function start() {
+  async function start() {
     const root = document.getElementById("matchesRoot");
+    root.innerHTML = `<p class="rank-loading">Carregando jogos…</p>`;
+    await KoTeams.hydrate(MATCHES); // troca "1º A"/"Ven. J##" pelos times reais (quando já definidos)
     root.innerHTML = buildTodaySection() + PHASE_ORDER.map(buildPhaseSection).join("");
     showResults(); // placar real dos jogos já encerrados
     renderBonus();
