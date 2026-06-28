@@ -25,7 +25,8 @@
    * @returns {void}
    */
   function start(profile) {
-    App.loadResults().then(({ res, tr }) => {
+    // Hidrata os times reais do mata-mata em paralelo com os resultados.
+    Promise.all([App.loadResults(), KoTeams.hydrate(MATCHES)]).then(([{ res, tr }]) => {
       const predictions = Storage.getPredictions();
       const bonus = Storage.getBonus();
       const stats = Scoring.scoreTotal(predictions, res, MATCHES);

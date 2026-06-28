@@ -45,7 +45,7 @@
   async function load(root, myId) {
     root.innerHTML = `<p class="rank-loading">Carregando palpites…</p>`;
     try {
-      const [data, rt] = await Promise.all([DB.fetchAll(), App.loadResults()]);
+      const [data, rt] = await Promise.all([DB.fetchAll(), App.loadResults(), KoTeams.hydrate(MATCHES)]);
       render(root, data, rt.res, myId);
     } catch (e) {
       root.innerHTML = empty('<i class="empty__icon ti ti-alert-triangle" aria-hidden="true"></i>',
