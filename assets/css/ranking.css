@@ -36,6 +36,9 @@
   animation: fadeUp 0.4s ease both;
 }
 
+/* a linha inteira do participante é clicável (abre o gráfico) / whole row clickable */
+.rank tbody tr.rank__row { cursor: pointer; }
+
 /* hover só nas linhas de participante (não na linha do gráfico) */
 .rank tbody tr.rank__row:hover {
   background: var(--color-surface-2);
