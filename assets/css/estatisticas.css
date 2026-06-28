@@ -265,3 +265,19 @@
 .estat-trk tbody tr.estat-1 .estat-trk__pos { box-shadow: inset 3px 0 0 var(--color-accent); }
 .estat-trk tbody tr.estat-1 .estat-trk__team span { color: var(--color-accent); font-weight: 700; }
 .estat-trk tbody tr.estat-2 { background: rgba(196, 255, 77, 0.05); }
+
+/* Mobile: a tabela cabe na tela sem scroll lateral. O gargalo era a coluna
+   Seleção (nome longo com nowrap esticava tudo); aqui soltamos a quebra do nome
+   e apertamos paddings/bandeira. / fit the table on small screens, no scroll. */
+@media (max-width: 520px) {
+  .estat-trk { min-width: 0; }
+  .estat-trk th, .estat-trk td { padding: 8px 5px; font-size: 0.82rem; }
+  .estat-trk td.estat-trk__team { white-space: normal; }
+  .estat-trk__team .flag { width: 18px; height: 12px; margin-right: 6px; }
+  .estat-trk__team span { line-height: 1.15; }
+  .estat-trk__pos { width: 22px; }
+  /* Cartões: pílulas menores e lado a lado — sem empilhar, que inflava a linha.
+     O nth-child(4) é a coluna de cartões. / keep the two card pills on one line. */
+  .estat-trk td:nth-child(4) { white-space: nowrap; }
+  .estat-trk .estat-pill { min-width: 14px; padding: 3px 4px; font-size: 0.72rem; }
+}
