@@ -342,8 +342,9 @@
   function pickRow(m, p, names, myId, res) {
     const me = (myId && p.participant_id === myId) ? " galera__pick--me" : "";
     const name = esc(names[p.participant_id] || "—");
-    const adv = (Scoring.KO_ADVANCE.has(m.phase) && p.advances)
-      ? `<span class="galera__adv"><i class="ti ti-arrow-narrow-right" aria-hidden="true"></i> ${p.advances === "home" ? esc(m.home) : esc(m.away)}</span>` : "";
+    const pa = Scoring.KO_ADVANCE.has(m.phase) ? Scoring.effectiveAdvance(p) : null;
+    const adv = pa
+      ? `<span class="galera__adv"><i class="ti ti-arrow-narrow-right" aria-hidden="true"></i> ${pa === "home" ? esc(m.home) : esc(m.away)}</span>` : "";
 
     // Pontos + destaque só quando o jogo já tem resultado / only when scored.
     let stateCls = "", pts = "";

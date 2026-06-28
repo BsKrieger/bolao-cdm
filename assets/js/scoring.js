@@ -53,18 +53,43 @@ const Scoring = (() => {
   }
 
   /**
-   * Advancement points (no multiplier); only on knockout phases.
-   * Pontos de classificação (sem multiplicador); só no mata-mata.
+   * Effective "who advances" from a prediction: the score-line winner when there
+   * is one; otherwise the manual pick (only meaningful on a draw, which goes to
+   * extra time/penalties). Single source of truth for the UI and the scoring, so
+   * a winner in the score never disagrees with the advancing side.
+   * "Quem avança" efetivo de um palpite: o vencedor do placar quando há um; senão,
+   * a escolha manual (só faz sentido no empate, que vai p/ prorrogação/pênaltis).
+   * Fonte única para a tela e a pontuação, então um vencedor no placar nunca
+   * diverge de quem avança.
    *
-   * @param {?{advances?: string}} pred - The prediction / O palpite.
+   * @param {?{home:number, away:number, advances?:string}} pred - The prediction / O palpite.
+   * @returns {?("home"|"away")}
+   */
+  function effectiveAdvance(pred) {
+    if (!pred) return null;
+    if (pred.home != null && pred.away != null) {
+      if (pred.home > pred.away) return "home";
+      if (pred.away > pred.home) return "away";
+    }
+    return pred.advances || null; // empate (ou sem placar): vale a escolha manual
+  }
+
+  /**
+   * Advancement points (no multiplier); only on knockout phases. Uses the
+   * effective advance (derived from the score when there's a winner).
+   * Pontos de classificação (sem multiplicador); só no mata-mata. Usa o avanço
+   * efetivo (derivado do placar quando há vencedor).
+   *
+   * @param {?{home:number, away:number, advances?:string}} pred - The prediction / O palpite.
    * @param {?{advances?: string}} res - The actual result / O resultado.
    * @param {string} phase - Match phase / Fase do jogo.
    * @returns {0|2}
    */
   function scoreAdvance(pred, res, phase) {
     if (!KO_ADVANCE.has(phase)) return 0;
-    if (!pred || !pred.advances || !res || !res.advances) return 0;
-    return pred.advances === res.advances ? 2 : 0;
+    const pa = effectiveAdvance(pred);
+    if (!pa || !res || !res.advances) return 0;
+    return pa === res.advances ? 2 : 0;
   }
 
   /**
@@ -176,8 +201,8 @@ const Scoring = (() => {
   }
 
   return {
-    sign, scoreLine, scoreAdvance, phaseMult, scoreMatch, isMax, scoreTotal,
-    scoreBonus, BONUS_POINTS, KO_ADVANCE,
+    sign, scoreLine, effectiveAdvance, scoreAdvance, phaseMult, scoreMatch, isMax,
+    scoreTotal, scoreBonus, BONUS_POINTS, KO_ADVANCE,
   };
 })();
 
