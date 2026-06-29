@@ -50,7 +50,13 @@
   async function load(root, myId) {
     root.innerHTML = `<p class="rank-loading">Carregando ranking…</p>`;
     try {
-      const [data, rt] = await Promise.all([DB.fetchAll(), App.loadResults()]);
+      // Hidrata os times reais do mata-mata antes de montar (p/ bandeiras nos
+      // placares). O 3º retorno é ignorado: hydrate muta o MATCHES no lugar.
+      // Hydrate knockout real teams first (so scores show flags); 3rd result
+      // is ignored — hydrate mutates MATCHES in place.
+      const [data, rt] = await Promise.all([
+        DB.fetchAll(), App.loadResults(), KoTeams.hydrate(MATCHES),
+      ]);
       render(root, buildModel(data, rt.res, rt.tr), myId);
     } catch (e) {
       root.innerHTML = `<div class="empty"><i class="empty__icon ti ti-alert-triangle" aria-hidden="true"></i>
