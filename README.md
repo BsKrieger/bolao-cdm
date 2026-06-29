@@ -95,7 +95,7 @@ e as estatísticas ao vivo no mesmo card:
 | Backend | Supabase (PostgreSQL + PostgREST), consumido via `fetch` |
 | Automação (resultados) | Supabase Edge Function (Deno) + cron, lendo da API pública da ESPN |
 | Escalações, stats da partida, classificação dos grupos, chaveamento e estatísticas da Copa | API pública da ESPN (sem chave) |
-| Convocados (lista do artilheiro) | football-data.org |
+| Convocados (lista do artilheiro) e artilheiro vencedor | API pública da ESPN (sem chave) |
 | Hospedagem | Netlify |
 
 ## Arquitetura

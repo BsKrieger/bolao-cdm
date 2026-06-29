@@ -135,13 +135,14 @@ horário e grava em `results`.
 
 **1. Publicar a função**
 - Painel Supabase → **Edge Functions** → *Create a new function* → nome
-  `sync-results` → cole o conteúdo de `supabase/functions/sync-results/index.ts`
-  → **Deploy**. Marque **"Verify JWT" = OFF** (a função só dispara um sync).
+  `sync-results` → publique a pasta `supabase/functions/sync-results/` inteira
+  (`index.ts` + os módulos `regulation.ts` e `leaders.ts`) → **Deploy**. Marque
+  **"Verify JWT" = OFF** (a função só dispara um sync).
 - (Alternativa via CLI: `supabase functions deploy sync-results --no-verify-jwt`.)
 
-**2. Secret da API**
-- Edge Functions → **Secrets** → adicione `FOOTBALL_DATA_TOKEN` = seu token.
-- (`SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` o Supabase injeta sozinho.)
+**2. Secrets da API**
+- Nenhum: a **ESPN é pública** (sem chave). `SUPABASE_URL` e
+  `SUPABASE_SERVICE_ROLE_KEY` o Supabase injeta sozinho.
 
 **3. Habilitar extensões**
 - Database → **Extensions** → habilite `pg_cron` e `pg_net`.

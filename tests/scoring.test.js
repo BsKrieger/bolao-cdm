@@ -47,6 +47,16 @@
   eq("grupos exato ×1 = 10", Scoring.scoreMatch({ phase: "group" }, { home: 0, away: 0 }, { home: 0, away: 0 }).total, 10);
   eq("16-avos: exato 10 + avanço derivado 2 ×1,25 = 15", Scoring.scoreMatch({ phase: "r32" }, { home: 1, away: 0 }, { home: 1, away: 0, advances: "home" }).total, 15);
 
+  // ---- scoreBonus (campeã + artilheiro) ----
+  eq("campeã certa = 20", Scoring.scoreBonus({ champion: "Brasil" }, { champion: "Brasil" }).champion, 20);
+  eq("campeã errada = 0", Scoring.scoreBonus({ champion: "Brasil" }, { champion: "França" }).champion, 0);
+  eq("artilheiro igual = 15", Scoring.scoreBonus({ topScorer: "Lionel Messi" }, { topScorer: "Lionel Messi" }).topScorer, 15);
+  eq("artilheiro ignora caixa/espaços = 15", Scoring.scoreBonus({ topScorer: "  lionel MESSI " }, { topScorer: "Lionel Messi" }).topScorer, 15);
+  eq("artilheiro ignora acento = 15", Scoring.scoreBonus({ topScorer: "Mbappe" }, { topScorer: "Mbappé" }).topScorer, 15);
+  eq("artilheiro ignora acento (2) = 15", Scoring.scoreBonus({ topScorer: "Vinicius Junior" }, { topScorer: "Vinícius Júnior" }).topScorer, 15);
+  eq("artilheiro diferente = 0", Scoring.scoreBonus({ topScorer: "Messi" }, { topScorer: "Mbappé" }).topScorer, 0);
+  eq("sem resultado do torneio = 0", Scoring.scoreBonus({ champion: "Brasil", topScorer: "Messi" }, null).total, 0);
+
   const failed = cases.filter((c) => !c.ok);
   const lines = cases.map((c) =>
     (c.ok ? "✓ " : "✗ ") + c.name + (c.ok ? "" : ` (esperado ${c.exp}, obteve ${c.got})`)

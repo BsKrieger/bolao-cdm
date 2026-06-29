@@ -3,14 +3,14 @@
  *
  * EN: Source is ESPN's public API (FREE, no key). Reads the World Cup games,
  *     takes the FINISHED ones and writes score + who advanced to the `results`
- *     table (and the champion to `tournament_result`). Runs on a cron, writes
+ *     table (and the champion + top scorer to `tournament_result`). Runs on a cron, writes
  *     via the service role (bypasses RLS). No API secret needed — ESPN is open;
  *     SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected by Supabase.
  *     The ESPN→our-id map reuses the already-validated UTC times and names; no
  *     match_id is changed.
  * PT-BR: Fonte: API pública da ESPN (GRATUITA, sem chave). Lê os jogos da Copa,
  *        pega os ENCERRADOS e grava placar + quem avançou na tabela `results`
- *        (e a campeã em `tournament_result`). Roda agendada (cron), escreve via
+ *        (e a campeã + o artilheiro em `tournament_result`). Roda agendada (cron), escreve via
  *        service role (ignora RLS). Não precisa de secret — a ESPN é aberta;
  *        SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são injetados pelo Supabase. O
  *        mapa ESPN→nossos IDs reaproveita os horários (UTC) e nomes já
@@ -20,6 +20,7 @@
  */
 
 import { regulationFromLinescores } from "./regulation.ts";
+import { goalsLeaderRef } from "./leaders.ts";
 
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -28,6 +29,10 @@ const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/sc
 // O summary traz o placar por período (1º/2º tempo, prorrogação, pênaltis), de
 // onde tiramos o tempo regulamentar no mata-mata. / per-period score endpoint.
 const ESPN_SUMMARY = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary";
+// Líderes individuais da Copa (artilheiro = líder de "goals"). Mesmo type usado
+// pela página de estatísticas. / individual leaders (top scorer = "goals" lead).
+const ESPN_LEADERS =
+  "https://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.world/seasons/2026/types/1/leaders";
 // A ESPN limita ~100 eventos por chamada; busco em blocos de datas. / fetch in chunks.
 const RANGES = ["20260611-20260627", "20260628-20260710", "20260711-20260719"];
 
@@ -171,6 +176,22 @@ async function sbUpsert(path: string, body: unknown) {
 }
 
 /**
+ * Reads a single row via PostgREST (first record, or null on miss/failure).
+ * Lê uma única linha via PostgREST (primeiro registro, ou null se falhar).
+ *
+ * @param path - Table + query after /rest/v1/ / Tabela + query.
+ * @returns The row or null / A linha ou null.
+ */
+async function sbGet(path: string): Promise<any | null> {
+  const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+  });
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
+/**
  * Fetches ESPN events in date chunks and de-duplicates by event id.
  * Busca os eventos da ESPN em blocos de datas e remove duplicados por id.
  *
@@ -220,10 +241,34 @@ async function fetchRegulation(
 }
 
 /**
+ * Fetches the World Cup top scorer (goals leader) from ESPN and resolves the
+ * player's name. Returns null on any failure (the champion is still written).
+ * Busca o artilheiro da Copa (líder de gols) na ESPN e resolve o nome do
+ * jogador. Devolve null em qualquer falha (a campeã ainda é gravada).
+ *
+ * @returns Top scorer display name, or null / Nome do artilheiro, ou null.
+ */
+async function fetchTopScorer(): Promise<string | null> {
+  try {
+    const r = await fetch(ESPN_LEADERS);
+    if (!r.ok) return null;
+    const ref = goalsLeaderRef(await r.json());
+    if (!ref) return null;
+    // Alguns $ref vêm como http://; força https. / force https on http refs.
+    const ar = await fetch(ref.replace(/^http:\/\//i, "https://"));
+    if (!ar.ok) return null;
+    const a = await ar.json();
+    return a.displayName ?? a.fullName ?? null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
  * Cron entry point: fetches finished games, maps them to our ids, upserts the
- * results (and the champion at the end), and returns a small JSON summary.
+ * results (and, at the end, the champion + top scorer), returning a JSON summary.
  * Entrada do cron: busca jogos encerrados, casa com nossos ids, grava os
- * resultados (e a campeã no fim) e devolve um pequeno resumo em JSON.
+ * resultados (e, no fim, a campeã + o artilheiro) e devolve um resumo em JSON.
  */
 Deno.serve(async () => {
   const events = await fetchEvents();
@@ -305,15 +350,24 @@ Deno.serve(async () => {
 
   if (rows.length) await sbUpsert("results?on_conflict=match_id", rows);
 
-  // Só a campeã é automática; o artilheiro fica pra preencher à mão (não
-  // sobrescreve o top_scorer já salvo).
+  // No fim do torneio (final encerrada), grava a campeã e o artilheiro. O
+  // artilheiro automático (líder de gols na ESPN) só preenche se ainda NÃO
+  // houver um valor definido à mão — assim um ajuste manual nunca é
+  // sobrescrito pelo cron. / champion + top scorer at the end; auto top scorer
+  // fills only when none is set manually (manual override is never clobbered).
+  let topScorer: string | null = null;
   if (champion) {
-    await sbUpsert("tournament_result?on_conflict=id", {
+    const current = await sbGet("tournament_result?id=eq.1&select=top_scorer");
+    topScorer = current?.top_scorer ?? (await fetchTopScorer());
+    const row: Record<string, unknown> = {
       id: 1, champion, updated_at: new Date().toISOString(),
-    });
+    };
+    if (topScorer) row.top_scorer = topScorer;
+    await sbUpsert("tournament_result?on_conflict=id", row);
   }
 
-  return new Response(JSON.stringify({ updated: rows.length, champion }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify({ updated: rows.length, champion, topScorer }),
+    { headers: { "Content-Type": "application/json" } },
+  );
 });
