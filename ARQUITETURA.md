@@ -27,15 +27,14 @@ flowchart LR
     end
 
     SUPA["Supabase<br/>PostgreSQL + PostgREST"]
-    ESPN["API pública da ESPN<br/>placares, grupos,<br/>escalações, stats"]
+    ESPN["API pública da ESPN<br/>placares, grupos, escalações,<br/>stats, convocados, artilheiro"]
     EF["Edge Function (cron)<br/>sync-results"]
-    FD["football-data.org<br/>só a lista de convocados"]
 
     DBA <-->|"palpites, ranking"| SUPA
     UI -->|"dados ao vivo"| ESPN
-    EF -->|"resultados"| ESPN
+    EF -->|"resultados + artilheiro"| ESPN
     EF -->|"grava em results"| SUPA
-    FD -.->|"gera scorers.js (offline)"| UI
+    ESPN -.->|"gera scorers.js (offline)"| UI
 ```
 
 - **Navegador** — o site roda inteiro no cliente. A UI nunca fala direto com o
@@ -44,9 +43,9 @@ flowchart LR
   no dashboard e nos testes.
 - **Supabase** — guarda palpites, bônus e resultados; serve o ranking compartilhado.
 - **ESPN** — fonte única dos dados reais: placares, classificação, chaveamento,
-  escalações e estatísticas. Lida no cliente (CORS liberado) e pela Edge Function.
-- **football-data.org** — usado só offline, para gerar a lista de convocados
-  (`scorers.js`) do palpite de artilheiro.
+  escalações, estatísticas, a lista de convocados (do palpite de artilheiro) e o
+  artilheiro vencedor. Lida no cliente (CORS liberado) e pela Edge Function; a
+  lista de convocados (`scorers.js`) é gerada offline por `tools/gen-scorers.py`.
 
 ## Camadas (dependência unidirecional)
 

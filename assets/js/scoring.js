@@ -172,13 +172,20 @@ const Scoring = (() => {
   const BONUS_POINTS = { champion: 20, topScorer: 15 };
 
   /**
-   * Normalizes a name for comparison (trim + lowercase).
-   * Normaliza um nome para comparação (trim + minúsculas).
+   * Normalizes a name for comparison: trim + lowercase + strip accents. Accent-
+   * insensitive so a pick saved with one spelling still matches the result from
+   * another source (e.g. "Mbappe" vs "Mbappé").
+   * Normaliza um nome para comparação: trim + minúsculas + remove acentos. Sem
+   * sensibilidade a acento, um palpite salvo com uma grafia ainda casa com o
+   * resultado vindo de outra fonte (ex.: "Mbappe" vs "Mbappé").
    *
    * @param {?string} s
    * @returns {string}
    */
-  function normName(s) { return (s || "").trim().toLowerCase(); }
+  function normName(s) {
+    return (s || "").trim().toLowerCase()
+      .normalize("NFD").replace(/\p{Diacritic}/gu, ""); // remove acentos
+  }
 
   /**
    * Scores the bonus picks against the tournament outcome.
