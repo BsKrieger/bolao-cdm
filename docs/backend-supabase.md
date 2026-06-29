@@ -128,9 +128,10 @@ sem re-deploy.
 
 ### Etapa B — busca automática (Supabase Edge Function + cron)
 
-Fonte: **football-data.org** (free; cobre a Copa 2026; resultados com pequeno
-atraso, ok para atualização diária). A função `supabase/functions/sync-results`
-já está pronta, com o mapa API→nossos jogos validado (bijeção 104↔104).
+Fonte: **API pública da ESPN** (sem chave; CORS liberado). A função
+`supabase/functions/sync-results` lê o `scoreboard` e, no mata-mata, o `summary`
+(placar do tempo regulamentar, 90'); casa os jogos da ESPN com os nossos por
+horário e grava em `results`.
 
 **1. Publicar a função**
 - Painel Supabase → **Edge Functions** → *Create a new function* → nome

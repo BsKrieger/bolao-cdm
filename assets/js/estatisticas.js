@@ -35,6 +35,12 @@
 
   const _cache = {};
 
+  /**
+   * Entry point: shows the profile chip (if any) and loads the stats.
+   * Ponto de entrada: mostra o chip do perfil (se houver) e carrega as estatísticas.
+   *
+   * @returns {void}
+   */
   function init() {
     const profile = (typeof Storage !== "undefined") && Storage.getProfile();
     if (profile && typeof App !== "undefined") App.renderProfileChip(profile);
@@ -74,6 +80,7 @@
     size = size || 8;
     const res = [];
     let i = 0;
+    // Cada worker consome itens da fila até esvaziar (concorrência limitada).
     async function worker() {
       while (i < items.length) {
         const idx = i++;
