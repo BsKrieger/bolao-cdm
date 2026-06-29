@@ -253,6 +253,7 @@ const App = (() => {
     const saveBtn = overlay.querySelector("#profileSave");
     nameInput.focus();
 
+    // Valida os campos e salva o perfil (login). / validates and saves the profile.
     async function submit() {
       const name = nameInput.value.trim();
       if (name.length < 2) { error.textContent = "Digite um nome com pelo menos 2 letras."; return; }

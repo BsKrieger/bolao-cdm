@@ -303,9 +303,16 @@
       </div></td></tr>`;
   }
 
-  // Painel ao lado do gráfico: palpites do jogador nos jogos JÁ finalizados,
-  // do mais recente para o mais antigo, com o placar real, o palpite e os pontos.
-  // / side panel: the player's picks on finished games, newest first.
+  /**
+   * Side panel next to the chart: the player's picks on finished games, newest
+   * first, each with the real score, the prediction and the points.
+   * Painel ao lado do gráfico: os palpites do jogador nos jogos já finalizados,
+   * do mais recente para o mais antigo, com o placar real, o palpite e os pontos.
+   *
+   * @param {*} id - Participant id / Id do participante.
+   * @param {Object} model - The ranking model / O modelo do ranking.
+   * @returns {string} Panel HTML / HTML do painel.
+   */
   function lastPicksPanel(id, model) {
     const preds = (model.predByP && model.predByP[id]) || {};
     const res = model.results || {};

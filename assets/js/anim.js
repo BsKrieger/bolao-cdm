@@ -109,6 +109,7 @@
     };
     if (reduce) { el.textContent = fmt(target); return; }
     var dur = 1200, start = null;
+    // Um quadro da animação do contador (chamado pelo requestAnimationFrame).
     function step(ts) {
       if (start === null) start = ts;
       var p = Math.min((ts - start) / dur, 1);

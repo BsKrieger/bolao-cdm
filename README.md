@@ -74,9 +74,15 @@ e as estatísticas ao vivo no mesmo card:
   (amarelos/vermelhos), maiores goleadas, público (total, médio e recorde) e um
   **ranking por seleção** — também da ESPN.
 - **Ranking compartilhado** com critério de desempate (placares exatos →
-  resultados certos) e setas de variação de posição. Clicar num nome **expande**
-  o gráfico de evolução da posição e a lista de palpites nos jogos finalizados.
-- **Busca automática de resultados** via função serverless agendada.
+  resultados certos) e setas de variação de posição. Clicar em **qualquer lugar
+  da linha** expande o gráfico de evolução da posição e a lista de palpites nos
+  jogos finalizados.
+- **Mata-mata com times reais**: quando os grupos terminam, os confrontos
+  ("1º A", "Ven. J##") viram os times de verdade nas telas de palpite (via ESPN).
+- **Quem avança segue o placar**: no mata-mata, havendo vencedor no palpite ele
+  avança automaticamente; a escolha manual de "quem avança" só aparece no empate.
+- **Busca automática de resultados** via função serverless agendada (lê da ESPN);
+  no mata-mata, o placar que vale é o do **tempo regulamentar (90')**.
 - Identidade visual **"Neon Noir"** (tema escuro) e layout **responsivo** (mobile-first).
 - Funciona **offline / com duplo-clique** (dados em arquivos `.js`, sem build).
 
@@ -87,7 +93,7 @@ e as estatísticas ao vivo no mesmo card:
 | Front-end | HTML, CSS e JavaScript puro (sem framework, sem bundler) |
 | Persistência local | `localStorage` |
 | Backend | Supabase (PostgreSQL + PostgREST), consumido via `fetch` |
-| Automação | Supabase Edge Function (Deno) + cron |
+| Automação (resultados) | Supabase Edge Function (Deno) + cron, lendo da API pública da ESPN |
 | Escalações, stats da partida, classificação dos grupos, chaveamento e estatísticas da Copa | API pública da ESPN (sem chave) |
 | Convocados (lista do artilheiro) | football-data.org |
 | Hospedagem | Netlify |
@@ -133,7 +139,7 @@ no navegador).
 │   ├── css/      estilos (global + um por página: jogos, galera, ranking, lineup,
 │   │             participante, grupos, estatisticas)
 │   ├── js/       lógica (scoring, storage, db, app, jogos, galera, ranking,
-│   │             lineup, grupos, estatisticas, countdown, anim)
+│   │             lineup, grupos, estatisticas, ko-teams, countdown, anim)
 │   └── img/      logo
 ├── data/         matches.js, teams.js, scorers.js, results.js, espn-teams.js
 ├── supabase/     Edge Function de busca automática de resultados
@@ -154,6 +160,12 @@ no navegador).
 - **Escalações e estatísticas direto da ESPN no cliente** — a API manda CORS
   liberado, então o campo e as stats ao vivo funcionam sem backend novo nem
   gravar nada no banco.
+- **Placar do mata-mata vale os 90'** — prorrogação e pênaltis não contam como
+  gol; pênaltis só decidem quem avança. A automação tira o placar regulamentar do
+  `summary` da ESPN (1º + 2º tempo).
+- **Avanço derivado do placar** — quem avança segue o vencedor do palpite; a
+  escolha manual só no empate. Uma fonte única (`effectiveAdvance`) garante que
+  placar e avanço nunca se contradigam, na tela e na pontuação.
 - **Código documentado em JSDoc bilíngue (PT-BR/EN)** — docstrings em todas as
   funções e cabeçalho assinado em cada arquivo.
 

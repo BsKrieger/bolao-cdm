@@ -38,7 +38,7 @@ fase e monta um ranking compartilhado.
 | Persistência local | `localStorage` | Resposta instantânea, funciona offline |
 | Backend | **Supabase** (PostgreSQL + PostgREST) via `fetch` | Ranking compartilhado entre todos, sem servidor próprio |
 | Automação | **Supabase Edge Function** (Deno) + cron | Busca resultados reais sozinha |
-| Fonte de dados esportivos | **football-data.org** (plano grátis) | Jogos, placares e artilheiro da Copa |
+| Fonte de dados esportivos | **API pública da ESPN** (sem chave) | Placares, classificação, chaveamento e estatísticas. A lista de convocados (palpite de artilheiro) vem do football-data.org |
 | Hospedagem | **Netlify** (arrastar a pasta) | Grátis, sem configuração |
 
 **Princípios que guiaram o código:**
@@ -77,11 +77,12 @@ graph TD
         EF --> DB
     end
 
-    FD["⚽ football-data.org<br/>(placares + artilheiro)"]
+    ESPN["⚽ API pública da ESPN<br/>(placares, grupos, estatísticas)"]
 
     JS -- "fetch (palpites, ranking)" --> API
-    CRON["⏰ Cron (a cada 4h)"] --> EF
-    EF -- "fetch resultados" --> FD
+    JS -- "fetch (escalações, grupos, stats)" --> ESPN
+    CRON["⏰ Cron"] --> EF
+    EF -- "fetch resultados" --> ESPN
 ```
 
 **Em uma frase:** o navegador guarda o palpite localmente (rápido) **e** o
@@ -173,8 +174,10 @@ consomem. Exemplo de `jogos.html`:
 | `assets/js/ranking.js` | UI | Monta o ranking + expansão (gráfico de evolução e palpites por jogo) |
 | `assets/js/grupos.js` | UI | Classificação dos grupos + chaveamento de dois lados (API ESPN) |
 | `assets/js/estatisticas.js` | UI | Estatísticas da Copa (líderes, goleadas, público, ranking por seleção — API ESPN) |
+| `assets/js/ko-teams.js` | UI/Dados | Hidrata o `MATCHES` com os times reais do mata-mata (casa nossos jogos com o `scoreboard` da ESPN por horário) |
 | `assets/css/*.css` | Estilo | `styles` (global) + um por página |
-| `supabase/functions/sync-results/index.ts` | Automação | Edge Function que busca resultados |
+| `supabase/functions/sync-results/index.ts` | Automação | Edge Function que busca os resultados na ESPN e grava no Supabase |
+| `supabase/functions/sync-results/regulation.ts` | Automação | Helper puro: placar do tempo regulamentar (90') a partir dos `linescores` da ESPN |
 | `tests/scoring.test.*` | Testes | Casos do motor de pontuação |
 | `tools/process_logo.py` | Utilitário | Processa a logo (máscara circular) |
 
@@ -344,22 +347,27 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    participant C as Cron (4h)
+    participant C as Cron
     participant EF as Edge Function
-    participant FD as football-data.org
+    participant ESPN as API ESPN
     participant DB as Supabase
 
     C->>EF: dispara
-    EF->>FD: GET /competitions/WC/matches
-    FD-->>EF: lista de jogos
-    loop cada jogo FINISHED
+    EF->>ESPN: GET /scoreboard (blocos de datas)
+    ESPN-->>EF: jogos da Copa
+    loop cada jogo encerrado
         EF->>EF: resolveId() → mapeia p/ nosso id
-        EF->>EF: extrai placar + quem avançou
+        alt jogo de mata-mata
+            EF->>ESPN: GET /summary (placar por período)
+            EF->>EF: placar = 1º + 2º tempo (90')
+        else jogo de grupos
+            EF->>EF: placar do scoreboard
+        end
+        EF->>EF: quem avançou (advance / winner)
     end
     EF->>DB: upsert em results
     alt final terminou
-        EF->>FD: GET /scorers (artilheiro)
-        EF->>DB: upsert champion + top_scorer
+        EF->>DB: upsert champion (campeã)
     end
 ```
 
@@ -499,26 +507,33 @@ Pontos de estudo:
   da lista, ele é mantido visível com "(fora da lista)" — nada some calado.
 - **`scheduleBonusAutoLock()`** fecha o bônus ao vivo no primeiro kickoff, com
   guarda contra o limite do `setTimeout` (~24,8 dias).
+- **`buildAdvance(m, pred)`** — no mata-mata, o seletor "quem avança" só fica
+  habilitado no **empate**; havendo vencedor no placar, ele avança
+  automaticamente (via `Scoring.effectiveAdvance`), e o card se atualiza quando o
+  placar muda.
+- **Times reais** — `KoTeams.hydrate(MATCHES)` troca os rótulos de vaga ("1º A",
+  "Ven. J##") pelos times reais quando a ESPN os define (mesma hidratação nas
+  telas "Meus palpites" e "Palpites da Galera").
 
 ### 7.6. `supabase/functions/sync-results/index.ts` — automação
 
-Edge Function em Deno (TypeScript) que roda na nuvem, agendada por cron. O
-coração dela é o **mapeamento** entre os jogos da API e os nossos `id`s:
+Edge Function em Deno (TypeScript) que roda na nuvem, agendada por cron. A fonte
+é a **API pública da ESPN** (gratuita, sem chave). O coração dela é o
+**mapeamento** entre os jogos da ESPN e os nossos `id`s:
 
 - **Grupos**: chave `utc|mandante|visitante` (com nomes traduzidos EN→PT pelo
-  `EN_TO_PT`) → nosso `id`, via `GROUP_MAP`.
-- **Mata-mata**: chave `fase|utc` → nosso `id`, via `KO_MAP` (porque os times
-  ainda são "slots" tipo "1º A").
+  `ESPN_TO_PT`) → nosso `id`, via `GROUP_MAP`.
+- **Mata-mata**: como nossos confrontos ainda são "slots" (tipo "1º A"), o
+  casamento é só pelo **horário** (`utc`) → nosso `id`, via `KO_BY_UTC`
+  (derivado do `KO_MAP`).
 
 ```ts
-function resolveId(m): number | undefined {
-  const ph = STAGE[m.stage];
-  const utc = normUtc(m.utcDate);
-  if (ph === "group") {
-    const h = EN_TO_PT[m.homeTeam?.name], a = EN_TO_PT[m.awayTeam?.name];
-    return GROUP_MAP[`${utc}|${h}|${a}`];
+function resolveId(utc, homePT, awayPT): number | undefined {
+  if (homePT && awayPT) {                  // grupos: casa por (horário|times)
+    const g = GROUP_MAP[`${utc}|${homePT}|${awayPT}`];
+    if (g) return g;
   }
-  return KO_MAP[`${ph}|${utc}`];
+  return KO_BY_UTC[utc];                    // mata-mata: casa só pelo horário
 }
 ```
 
@@ -535,9 +550,10 @@ apenas o `advances`. Se a ESPN não trouxer os períodos de um jogo, o placar n�
 gravado (fica no log, para preenchimento manual), para nunca salvar um 120' por
 engano.
 
-> **Chave da integração:** o nome do artilheiro vem do football-data.org. Por
-> isso a lista do artilheiro (`scorers.js`) é gerada **da mesma fonte** — assim a
-> grafia do palpite casa exatamente com a do resultado na hora de pontuar.
+> **Sobre o artilheiro:** a **lista** de jogadores do palpite de artilheiro
+> (`scorers.js`) é gerada do football-data.org (via `tools/gen-scorers.py`) — é a
+> única parte que ainda usa essa fonte. Já o **resultado** do artilheiro não é
+> automático: o organizador preenche o `top_scorer` à mão no fim da Copa.
 
 ### 7.7. `grupos.js` e `estatisticas.js` — espelho da Copa real (ESPN)
 
@@ -597,11 +613,16 @@ function scoreLine(pred, res) {
 - Resultado certo → **5**; se além disso a **diferença de gols** for igual, **+3**
   (vale até para empate: diferença 0 = 0).
 
-### 8.2. Classificação no mata-mata — `scoreAdvance`
+### 8.2. Classificação no mata-mata — `scoreAdvance` / `effectiveAdvance`
 
 Só vale nas fases de `KO_ADVANCE` (16-avos a semis). Dá **+2** se o lado que o
-palpiteiro marcou para avançar é o que realmente avançou (inclui decisão por
-pênaltis, porque comparamos `advances`, não o placar).
+palpiteiro indicou para avançar é o que realmente avançou.
+
+O lado indicado é o **avanço efetivo** (`effectiveAdvance`): se o palpite de placar
+tem um vencedor, é ele que avança (derivado do placar); só no **empate** vale a
+escolha manual de "quem avança". Assim, placar e avanço nunca se contradizem, e a
+comparação com o resultado real (que inclui pênaltis no empate) fica justa — sem
+ninguém pontuar com placar e avanço descasados.
 
 ### 8.3. Multiplicador e total do jogo — `scoreMatch`
 
@@ -663,7 +684,7 @@ o mesmo motor roda nos testes (`tests/scoring.test.js`) e no navegador.
 | Dados em `.js` (não `.json`) | `fetch` de JSON | Faz o site funcionar com duplo-clique (`file://`), sem servidor |
 | `localStorage` + Supabase | Só backend | Resposta instantânea local; backend só para compartilhar o ranking |
 | `fetch` cru no Supabase | SDK `@supabase/supabase-js` | Uma dependência a menos; o PostgREST é simples o suficiente |
-| football-data.org | API-Football | O plano grátis cobre a Copa 2026; a API-Football não cobria 2026 |
+| API pública da ESPN | football-data.org, API-Football | Sem chave e com CORS liberado (dá pra ler no cliente), e traz o placar por período — necessário para o mata-mata valer os 90'. O football-data ficou só para gerar a lista de convocados |
 | `<select>` nativo no artilheiro | dropdown customizado | 1.249 itens: o nativo dá busca-ao-digitar e seletor de celular de graça |
 | Trava no cliente | só no servidor | Simples e suficiente para amigos (ver ressalva em Segurança) |
 
