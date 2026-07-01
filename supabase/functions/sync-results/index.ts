@@ -21,6 +21,7 @@
 
 import { regulationFromLinescores } from "./regulation.ts";
 import { goalsLeaderRef } from "./leaders.ts";
+import { KoSlot, nearestKoId } from "./komatch.ts";
 
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -128,6 +129,14 @@ for (const key of Object.keys(KO_MAP)) {
 // regulamentar (90'). / every knockout id; these score regulation time only.
 const KO_IDS = new Set<number>(Object.values(KO_MAP));
 
+// Slots do mata-mata como timestamps, para casar por proximidade quando a ESPN
+// remarca o kickoff (adiamento). Tolerância igual à do ko-teams.js no cliente.
+// Knockout slots as timestamps, matched by proximity on ESPN kickoff shifts.
+const KO_SLOTS: KoSlot[] = Object.entries(KO_BY_UTC).map(
+  ([utc, id]) => ({ ms: new Date(utc).getTime(), id }),
+);
+const KO_TOLERANCE_MS = 90 * 60000;
+
 /**
  * Normalizes a date string to a canonical UTC ISO key (no millis).
  * Normaliza uma data para uma chave ISO UTC canônica (sem milissegundos).
@@ -140,8 +149,11 @@ function normUtc(s: string): string {
 }
 
 /**
- * Matches an ESPN game to our id: group stage by (utc|teams), knockout by (utc).
- * Casa o jogo da ESPN com o nosso id: grupos por (utc|times), mata-mata por (utc).
+ * Matches an ESPN game to our id: group stage by (utc|teams); knockout by time,
+ * exact first then nearest slot within tolerance (survives kickoff shifts).
+ * Casa o jogo da ESPN com o nosso id: grupos por (utc|times); mata-mata por
+ * horário, exato primeiro e depois o slot mais próximo dentro da tolerância
+ * (aguenta remarcação de kickoff).
  *
  * @param utc - Canonical UTC key / Chave UTC canônica.
  * @param homePT - Home team (PT) / Mandante (PT).
@@ -153,7 +165,8 @@ function resolveId(utc: string, homePT?: string, awayPT?: string): number | unde
     const g = GROUP_MAP[`${utc}|${homePT}|${awayPT}`];
     if (g) return g;
   }
-  return KO_BY_UTC[utc];
+  return KO_BY_UTC[utc] ??
+    nearestKoId(new Date(utc).getTime(), KO_SLOTS, KO_TOLERANCE_MS);
 }
 
 /**
@@ -288,7 +301,17 @@ Deno.serve(async () => {
     const homePT = ESPN_TO_PT[home.team?.displayName];
     const awayPT = ESPN_TO_PT[away.team?.displayName];
     const id = resolveId(utc, homePT, awayPT);
-    if (!id) continue;                                   // não casou: deixa sem resultado
+    if (!id) {
+      // Jogo encerrado que não casou com nenhum slot (ex.: adiamento além da
+      // tolerância). NÃO some calado: loga p/ o organizador ver e, se preciso,
+      // lançar o placar à mão no Table Editor. / never drop a finished game
+      // silently — log it so a big postponement is visible.
+      console.error(
+        `sync-results: jogo encerrado sem match — ${home.team?.displayName} x ` +
+          `${away.team?.displayName} @ ${e.date} (poss. adiamento)`,
+      );
+      continue;
+    }
 
     finished.push({ eventId: e.id, id, cs, home, away });
   }
