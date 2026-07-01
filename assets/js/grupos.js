@@ -279,6 +279,31 @@
   }
 
   /**
+   * Resolves a "Ven. J##" slot to the real winner once that feeder game is
+   * decided — even if the sibling isn't yet — so a winner climbs into the next
+   * round's box immediately. Other labels ("1º A", "3º A/B/C…") stay as-is
+   * (ESPN fills the whole box once both group positions resolve).
+   * Resolve um slot "Ven. J##" para o vencedor real assim que o jogo alimentador
+   * é decidido — mesmo que o outro lado ainda não — fazendo o vencedor "subir"
+   * pro próximo confronto na hora. Outros rótulos ("1º A") ficam como estão.
+   *
+   * @param {string} name - The slot label / O rótulo do slot.
+   * @param {Object} by - Knockout matches by id / Jogos por id.
+   * @param {Object} idx - ESPN events by time / Jogos da ESPN por horário.
+   * @returns {{name:string, tbd:boolean}}
+   */
+  function resolveSide(name, by, idx) {
+    const x = /Ven\.\s*J(\d+)/.exec(name || "");
+    const feeder = x && by[Number(x[1])];
+    if (!feeder) return { name: name, tbd: true };       // "1º A" etc.: espera a ESPN
+    const fe = espnFor(feeder, idx);
+    const cs = (fe && fe.competitions && fe.competitions[0] && fe.competitions[0].competitors) || [];
+    const w = cs.find((c) => c.advance === true) || cs.find((c) => c.winner === true);
+    const pt = w && ptName(w.team && w.team.displayName);
+    return pt ? { name: pt, tbd: false } : { name: name, tbd: true };
+  }
+
+  /**
    * Builds one knockout match box: real teams + score from ESPN when both sides
    * are decided, otherwise our PT placeholders ("2º A", "Ven. J##").
    * Monta um card do mata-mata: times + placar reais da ESPN quando os dois lados
@@ -288,7 +313,7 @@
    * @param {Object} idx - ESPN events by time / Jogos da ESPN por horário.
    * @returns {string}
    */
-  function koMatch(m, idx) {
+  function koMatch(m, by, idx) {
     if (!m) return "";
     const e = espnFor(m, idx);
     const cs = (e && e.competitions && e.competitions[0] && e.competitions[0].competitors) || [];
@@ -296,9 +321,11 @@
     const ea = cs.find((c) => c.homeAway === "away") || cs[1];
     const real = eh && ea && ptName(eh.team && eh.team.displayName) && ptName(ea.team && ea.team.displayName);
     const played = !!(e && e.status && e.status.type && e.status.type.state === "post");
+    // ESPN formou o confronto -> times + placar reais. Senão, resolve cada lado
+    // pelo vencedor do jogo alimentador (o já decidido "sobe" pro slot).
     const sides = real
       ? [koSide(eh), koSide(ea)]
-      : [{ name: m.home, tbd: true }, { name: m.away, tbd: true }];
+      : [resolveSide(m.home, by, idx), resolveSide(m.away, by, idx)];
     return '<div class="br__match" data-mid="' + m.id + '">' +
       sides.map((s) => koSideRow(s, played)).join("") + '</div>';
   }
@@ -345,7 +372,7 @@
    * @returns {string}
    */
   function bracketCol(ids, by, idx, title) {
-    const cells = (ids || []).map((id) => koMatch(by[id], idx)).join("");
+    const cells = (ids || []).map((id) => koMatch(by[id], by, idx)).join("");
     return `<div class="br2__col"><h4 class="br__round">${esc(title)}</h4><div class="br2__col-body">${cells}</div></div>`;
   }
 
@@ -377,7 +404,7 @@
 
     const center = `<div class="br2__center">
       <h4 class="br__round br2__final-label">Final</h4>
-      ${final ? koMatch(final, idx) : ""}
+      ${final ? koMatch(final, by, idx) : ""}
       <div class="br2__trophy" title="Troféu da Copa do Mundo">
         <i class="ti ti-trophy" aria-hidden="true"></i>
         <span>Campeão</span>
@@ -385,7 +412,7 @@
     </div>`;
 
     const thirdHtml = third
-      ? `<div class="br2__third"><h4 class="br__round">Disputa de 3º lugar</h4>${koMatch(third, idx)}</div>`
+      ? `<div class="br2__third"><h4 class="br__round">Disputa de 3º lugar</h4>${koMatch(third, by, idx)}</div>`
       : "";
 
     return `<div class="br2">
